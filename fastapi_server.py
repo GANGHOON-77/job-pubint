@@ -87,7 +87,12 @@ async def favicon():
 @app.get("/")
 async def serve_index():
     """HTML 페이지 제공"""
-    return FileResponse("index.html", media_type="text/html")
+    return FileResponse("index_v1.1.html", media_type="text/html")
+
+@app.get("/index_v1.1.html")
+async def serve_index_v11():
+    """버전 1.1 HTML 페이지 제공"""
+    return FileResponse("index_v1.1.html", media_type="text/html")
 
 @app.get("/api")
 async def api_root():

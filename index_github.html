@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏛️ 대한민국 공공기관 채용정보</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            padding: 40px 20px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            margin-bottom: 40px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 100px;
+            background: white;
+            border-radius: 20px;
+            font-size: 1.5em;
+            color: #667eea;
+        }
+        
+        .error {
+            text-align: center;
+            padding: 50px;
+            background: #fff5f5;
+            border: 2px solid #fed7d7;
+            border-radius: 20px;
+            color: #c53030;
+            margin: 20px 0;
+        }
+        
+        .temp-notice {
+            background: #fff8dc;
+            border: 2px solid #ffd700;
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .temp-notice h2 {
+            color: #d97706;
+            margin-bottom: 15px;
+        }
+        
+        .temp-notice p {
+            color: #92400e;
+            line-height: 1.6;
+        }
+        
+        .temp-notice a {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 10px;
+            font-weight: bold;
+            transition: transform 0.3s;
+        }
+        
+        .temp-notice a:hover {
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏛️ 대한민국 공공기관 채용정보</h1>
+            <p>공공기관 채용정보를 한눈에 확인하세요</p>
+        </div>
+        
+        <div class="temp-notice">
+            <h2>⚠️ 서비스 점검 중</h2>
+            <p>현재 서버 설정을 업데이트하고 있습니다.<br>
+            잠시 후 다시 접속해 주세요.</p>
+            <p style="margin-top: 20px;">
+                <strong>임시 접속 주소:</strong><br>
+                로컬 서버가 실행 중이라면 아래 링크를 이용하세요
+            </p>
+            <a href="http://localhost:8001" target="_blank">로컬 서버 접속 (포트 8001)</a>
+        </div>
+        
+        <div class="loading">
+            🔄 데이터 로딩 중...
+        </div>
+    </div>
+    
+    <script>
+        // Firebase 직접 연결 테스트
+        console.log('GitHub Pages 정적 호스팅 활성화됨');
+        
+        // 추후 Firebase 직접 연결 코드 추가 예정
+        setTimeout(() => {
+            document.querySelector('.loading').innerHTML = 
+                '📊 GitHub Actions 자동화 시스템 작동 중<br>' +
+                '<small>매 5분마다 신규 채용공고 수집</small>';
+        }, 2000);
+    </script>
+</body>
+</html>

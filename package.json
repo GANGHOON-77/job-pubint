@@ -1,0 +1,8 @@
+{
+  "name": "public-int",
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "python -m http.server 8001",
+    "build": "echo 'No build needed'"
+  }
+}

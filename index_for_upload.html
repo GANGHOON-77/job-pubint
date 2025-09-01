@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏛️ 대한민국 공공기관 채용정보</title>
+    <link rel="icon" href="data:,">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #f5f6fa 0%, #e8eaf0 100%);
+            color: #2c3e50;
+            line-height: 1.6;
+        }
+
+        .header {
+            background: #ffffff;
+            color: #1565c0;
+            padding: 30px 0 40px 0;
+            text-align: center;
+            border-bottom: 1px solid #e0e0e0;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .title-highlight {
+            color: #1e3a8a;
+            font-weight: 800;
+        }
+        
+        .title-main {
+            color: #3b82f6;
+            font-weight: 800;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .controls {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.08);
+            margin-bottom: 30px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 250px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e1e8ed;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: #3742fa;
+            box-shadow: 0 0 0 3px rgba(55, 66, 250, 0.1);
+        }
+
+        .load-btn {
+            padding: 12px 24px;
+            background: #2ed573;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .load-btn:hover {
+            background: #26d065;
+            transform: translateY(-1px);
+        }
+
+        .load-btn:disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .stats-grid {
+            background: #1976d2;
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            color: white;
+        }
+
+        .stat-card {
+            text-align: center;
+            flex: 1;
+        }
+
+        .stat-number {
+            font-size: 32px;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .stat-number:hover {
+            transform: scale(1.05);
+            text-shadow: 0 0 10px rgba(255,255,255,0.5);
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: white;
+            font-weight: 500;
+        }
+
+        .jobs-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            gap: 25px;
+            margin-bottom: 50px;
+        }
+
+        .job-card {
+            background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
+            border: none;
+            border-radius: 16px;
+            padding: 24px;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+            box-shadow: 
+                0 4px 6px rgba(0, 0, 0, 0.05),
+                0 1px 3px rgba(0, 0, 0, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.5);
+        }
+
+        .job-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 
+                0 20px 30px rgba(102, 126, 234, 0.2),
+                0 10px 15px rgba(0, 0, 0, 0.12),
+                inset 0 1px 0 rgba(255, 255, 255, 0.7);
+        }
+
+        .job-dday {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 700;
+            box-shadow: 0 4px 10px rgba(251, 191, 36, 0.3);
+        }
+
+        .job-dday.urgent {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .job-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1a202c;
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+
+        .job-company {
+            font-size: 14px;
+            color: #64748b;
+            font-weight: 500;
+            margin-bottom: 16px;
+        }
+
+        .job-details {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .job-detail-item {
+            display: flex;
+            align-items: center;
+            font-size: 13px;
+            color: #475569;
+            gap: 8px;
+        }
+
+        .badge {
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .badge-status {
+            background: linear-gradient(135deg, #2ed573, #26d065);
+            color: white;
+        }
+
+        .badge-type {
+            background: linear-gradient(135deg, #e5e7eb, #d1d5db);
+            color: #4b5563;
+            border: 1px solid rgba(156, 163, 175, 0.3);
+        }
+
+        .badge-urgent {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            color: white;
+            animation: pulse 1.5s infinite;
+        }
+
+        .job-footer {
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .job-date {
+            font-size: 12px;
+            color: #94a3b8;
+        }
+
+        .job-detail-btn {
+            padding: 6px 12px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 6px rgba(102, 126, 234, 0.3);
+        }
+
+        .job-detail-btn:hover {
+            background: linear-gradient(135deg, #5a67d8, #6b46c1);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 10px rgba(102, 126, 234, 0.4);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 50px;
+            font-size: 18px;
+            color: #64748b;
+        }
+
+        .spinner {
+            border: 4px solid #f3f4f6;
+            border-top: 4px solid #3b82f6;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #64748b;
+        }
+
+        .empty-state h3 {
+            font-size: 24px;
+            margin-bottom: 10px;
+            color: #475569;
+        }
+
+        /* 모달 스타일 추가 */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(0,0,0,0.6), rgba(26, 41, 128, 0.3));
+            backdrop-filter: blur(10px);
+        }
+
+        .modal-content {
+            background: white;
+            margin: 2% auto;
+            width: 90%;
+            max-width: 1200px;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 {
+            font-size: 20px;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .close {
+            color: white;
+            font-size: 32px;
+            font-weight: 300;
+            cursor: pointer;
+            line-height: 1;
+            transition: all 0.3s ease;
+        }
+
+        .close:hover {
+            transform: rotate(90deg);
+        }
+
+        .modal-body {
+            padding: 30px;
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+
+        /* 반응형 */
+        @media (max-width: 768px) {
+            .jobs-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 24px;
+            }
+            
+            .stats-grid {
+                flex-direction: column;
+                gap: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 헤더 -->
+    <div class="header">
+        <div>
+            <h1>🏢 <span class="title-highlight">대한민국</span> <span class="title-main">공공기관</span> <span class="title-highlight">채용정보</span></h1>
+            <p>공공기관 채용정보를 한눈에 확인하세요</p>
+        </div>
+    </div>
+
+    <!-- 메인 컨테이너 -->
+    <div class="container">
+        <!-- 제어 패널 -->
+        <div class="controls">
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="기관명, 채용제목으로 검색...">
+            </div>
+            <button class="load-btn" id="loadBtn" onclick="loadJobs()">
+                📥 채용정보 불러오기
+            </button>
+        </div>
+
+        <!-- 통계 섹션 -->
+        <div class="stats-grid" id="statsGrid" style="display: none;">
+            <div class="stat-card">
+                <div class="stat-number" id="totalCount">0</div>
+                <div class="stat-label">전체 채용</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="urgentCount">0</div>
+                <div class="stat-label">마감임박</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="newCount">0</div>
+                <div class="stat-label">신규 채용</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="orgCount">0</div>
+                <div class="stat-label">등록기관</div>
+            </div>
+        </div>
+
+        <!-- 채용공고 그리드 -->
+        <div class="jobs-grid" id="jobsGrid">
+            <div class="empty-state">
+                <h3>📋 채용정보를 불러와주세요</h3>
+                <p>상단의 '채용정보 불러오기' 버튼을 클릭하여 최신 공고를 확인하세요.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 상세보기 모달 -->
+    <div id="jobModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">채용공고 상세정보</h2>
+                <span class="close" onclick="closeModal()">&times;</span>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <!-- 상세 내용이 여기에 동적으로 삽입됩니다 -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 전역 변수
+        let allJobs = [];
+        let currentPage = 1;
+        const itemsPerPage = 12;
+
+        // API 기본 URL 설정
+        const API_BASE_URL = window.location.hostname.includes('vercel.app') 
+            ? '/api'  // Vercel에서는 상대 경로
+            : 'http://localhost:8001/api';  // 로컬에서는 절대 경로
+
+        console.log('API Base URL:', API_BASE_URL);
+
+        // 채용정보 불러오기
+        async function loadJobs() {
+            const loadBtn = document.getElementById('loadBtn');
+            const jobsGrid = document.getElementById('jobsGrid');
+            const statsGrid = document.getElementById('statsGrid');
+            
+            loadBtn.disabled = true;
+            loadBtn.textContent = '⏳ 불러오는 중...';
+            
+            jobsGrid.innerHTML = '<div class="loading"><div class="spinner"></div>채용정보를 불러오는 중입니다...</div>';
+            
+            try {
+                console.log('데이터 로드 시작...');
+                
+                // 채용공고 데이터 가져오기
+                const jobsResponse = await fetch(`${API_BASE_URL}/jobs?limit=300`);
+                if (!jobsResponse.ok) {
+                    throw new Error(`HTTP error! status: ${jobsResponse.status}`);
+                }
+                
+                allJobs = await jobsResponse.json();
+                console.log(`총 ${allJobs.length}건 로드됨`);
+                
+                // 통계 데이터 가져오기
+                await loadStats();
+                statsGrid.style.display = 'flex';
+                
+                // 채용공고 표시
+                displayJobs();
+                
+            } catch (error) {
+                console.error('데이터 로드 실패:', error);
+                
+                allJobs = [];
+                jobsGrid.innerHTML = `
+                    <div class="empty-state">
+                        <h3>😔 데이터 로드 실패</h3>
+                        <p>서버 연결을 확인해주세요.</p>
+                        <p style="color: #999; font-size: 14px; margin-top: 10px;">${error.message}</p>
+                    </div>
+                `;
+                
+            } finally {
+                loadBtn.disabled = false;
+                loadBtn.textContent = '📥 채용정보 불러오기';
+            }
+        }
+
+        // 통계 데이터 로드
+        async function loadStats() {
+            try {
+                const statsResponse = await fetch(`${API_BASE_URL}/stats`);
+                if (statsResponse.ok) {
+                    const stats = await statsResponse.json();
+                    document.getElementById('totalCount').textContent = stats.total_count;
+                    document.getElementById('urgentCount').textContent = stats.urgent_count;
+                    document.getElementById('newCount').textContent = stats.new_count;
+                    document.getElementById('orgCount').textContent = stats.org_count;
+                } else {
+                    updateStats();
+                }
+            } catch (error) {
+                console.error('통계 로드 실패:', error);
+                updateStats();
+            }
+        }
+
+        // 통계 업데이트
+        function updateStats() {
+            const today = new Date();
+            const sevenDaysAgo = new Date();
+            sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+            const threeDaysLater = new Date();
+            threeDaysLater.setDate(threeDaysLater.getDate() + 3);
+            
+            const totalCount = allJobs.length;
+            const urgentCount = allJobs.filter(job => {
+                const endDate = new Date(job.end_date);
+                return endDate <= threeDaysLater && endDate >= today;
+            }).length;
+            const newCount = allJobs.filter(job => {
+                const regDate = new Date(job.reg_date);
+                return regDate >= sevenDaysAgo;
+            }).length;
+            const uniqueOrgs = new Set(allJobs.map(job => job.dept_name));
+            const orgCount = uniqueOrgs.size;
+            
+            document.getElementById('totalCount').textContent = totalCount;
+            document.getElementById('urgentCount').textContent = urgentCount;
+            document.getElementById('newCount').textContent = newCount;
+            document.getElementById('orgCount').textContent = orgCount;
+        }
+
+        // 채용공고 표시
+        function displayJobs() {
+            const jobsGrid = document.getElementById('jobsGrid');
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            
+            let displayJobs = allJobs;
+            
+            if (searchTerm) {
+                displayJobs = allJobs.filter(job => 
+                    job.title.toLowerCase().includes(searchTerm) ||
+                    job.dept_name.toLowerCase().includes(searchTerm)
+                );
+            }
+            
+            if (displayJobs.length === 0) {
+                jobsGrid.innerHTML = '<div class="empty-state"><h3>😔 검색 결과가 없습니다</h3><p>다른 검색어를 시도해보세요.</p></div>';
+                return;
+            }
+            
+            const pageJobs = displayJobs.slice(0, 50); // 첫 50개만 표시
+            jobsGrid.innerHTML = pageJobs.map(job => createJobCard(job)).join('');
+        }
+
+        // 채용공고 카드 생성
+        function createJobCard(job) {
+            const today = new Date();
+            const endDate = new Date(job.end_date);
+            const daysLeft = Math.ceil((endDate - today) / (1000 * 60 * 60 * 24));
+            const isUrgent = daysLeft <= 3;
+            
+            return `
+                <div class="job-card" onclick="showJobDetail('${job.idx}')">
+                    <div class="job-dday ${isUrgent ? 'urgent' : ''}">
+                        D-${daysLeft}
+                    </div>
+                    <div style="margin-bottom: 16px;">
+                        <div style="display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap;">
+                            <span class="badge badge-status">진행중</span>
+                            <span class="badge badge-type">${job.employment_type}</span>
+                            ${isUrgent ? '<span class="badge badge-urgent">마감임박</span>' : ''}
+                        </div>
+                        <div class="job-title">${job.title}</div>
+                        <div class="job-company">${job.dept_name}</div>
+                    </div>
+                    <div class="job-details">
+                        <div class="job-detail-item">
+                            <span>📍</span>
+                            <span>근무지: ${job.work_region}</span>
+                        </div>
+                        <div class="job-detail-item">
+                            <span>💼</span>
+                            <span>고용형태: ${job.employment_type}</span>
+                        </div>
+                        <div class="job-detail-item">
+                            <span>👥</span>
+                            <span>채용인원: ${job.recruit_num}명</span>
+                        </div>
+                    </div>
+                    <div class="job-footer">
+                        <div class="job-date">
+                            <div>등록일: ${formatDate(job.reg_date)}</div>
+                            <div style="color: ${isUrgent ? '#ef4444' : '#64748b'}">
+                                마감일: ${formatDate(job.end_date)}
+                            </div>
+                        </div>
+                    </div>
+                    <div style="display: flex; justify-content: flex-end; margin-top: 12px;">
+                        <button class="job-detail-btn" onclick="showJobDetail('${job.idx}'); event.stopPropagation();">
+                            📋 상세보기
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 상세보기 모달 표시
+        function showJobDetail(jobIdx) {
+            const job = allJobs.find(j => j.idx === jobIdx);
+            if (!job) return;
+            
+            const modal = document.getElementById('jobModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalBody = document.getElementById('modalBody');
+            
+            modalTitle.textContent = job.title;
+            
+            modalBody.innerHTML = `
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
+                    <div>
+                        <h3 style="margin-bottom: 20px; color: #1565c0;">📋 기본정보</h3>
+                        <div style="display: flex; flex-direction: column; gap: 15px;">
+                            <div><strong>공고번호:</strong> ${job.idx}</div>
+                            <div><strong>기관명:</strong> ${job.dept_name}</div>
+                            <div><strong>근무지:</strong> ${job.work_region}</div>
+                            <div><strong>고용형태:</strong> ${job.employment_type}</div>
+                            <div><strong>채용인원:</strong> ${job.recruit_num}명</div>
+                            <div><strong>학력:</strong> ${job.education || '학력무관'}</div>
+                            <div><strong>급여:</strong> ${job.salary_info || '회사내규에 따름'}</div>
+                            <div><strong>채용기간:</strong> ${job.recruit_period}</div>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 style="margin-bottom: 20px; color: #1565c0;">📄 상세내용</h3>
+                        <div style="background: #f8fafc; padding: 20px; border-radius: 8px; max-height: 300px; overflow-y: auto;">
+                            ${job.detail_content || '상세 내용이 없습니다.'}
+                        </div>
+                        
+                        <h3 style="margin: 20px 0; color: #1565c0;">📎 첨부파일</h3>
+                        <div style="background: #f8fafc; padding: 15px; border-radius: 8px; text-align: center; color: #666;">
+                            ${renderAttachments(job)}
+                        </div>
+                        
+                        <div style="display: flex; gap: 10px; margin-top: 30px;">
+                            <button onclick="applyToJob('${job.idx}')" style="flex: 1; padding: 12px; background: #667eea; color: white; border: none; border-radius: 8px; cursor: pointer;">
+                                ✏️ 지원하기
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            modal.style.display = 'block';
+        }
+
+        // 첨부파일 렌더링
+        function renderAttachments(job) {
+            if (job.attachments) {
+                let html = '';
+                
+                if (job.attachments.announcement) {
+                    html += `<div style="margin: 5px 0;"><a href="https://www.alio.go.kr/download/download.json?fileNo=${job.attachments.announcement.fileID}" target="_blank">📄 ${job.attachments.announcement.name}</a></div>`;
+                }
+                
+                if (job.attachments.application) {
+                    html += `<div style="margin: 5px 0;"><a href="https://www.alio.go.kr/download/download.json?fileNo=${job.attachments.application.fileID}" target="_blank">📝 ${job.attachments.application.name}</a></div>`;
+                }
+                
+                if (job.attachments.job_description) {
+                    html += `<div style="margin: 5px 0;"><a href="https://www.alio.go.kr/download/download.json?fileNo=${job.attachments.job_description.fileID}" target="_blank">📋 ${job.attachments.job_description.name}</a></div>`;
+                }
+                
+                if (job.attachments.others && job.attachments.others.length > 0) {
+                    job.attachments.others.forEach(file => {
+                        html += `<div style="margin: 5px 0;"><a href="https://www.alio.go.kr/download/download.json?fileNo=${file.fileID}" target="_blank">📎 ${file.name}</a></div>`;
+                    });
+                }
+                
+                if (job.attachments.unavailable_reason) {
+                    html += `<div style="color: #999; font-style: italic;">미첨부 사유: ${job.attachments.unavailable_reason}</div>`;
+                }
+                
+                return html || '첨부파일이 없습니다.';
+            }
+            
+            return '첨부파일 정보가 없습니다.';
+        }
+
+        // 지원하기
+        function applyToJob(jobIdx) {
+            const job = allJobs.find(j => j.idx === jobIdx);
+            if (job && job.src_url) {
+                window.open(job.src_url, '_blank');
+            } else {
+                // ALIO 사이트로 직접 이동
+                const alio_url = `https://job.alio.go.kr/recruitview.do?pageNo=1&idx=${jobIdx}`;
+                window.open(alio_url, '_blank');
+            }
+        }
+
+        // 모달 닫기
+        function closeModal() {
+            document.getElementById('jobModal').style.display = 'none';
+        }
+
+        // 날짜 포맷
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, '0')}.${String(date.getDate()).padStart(2, '0')}`;
+        }
+
+        // 검색 이벤트
+        document.getElementById('searchInput').addEventListener('input', displayJobs);
+
+        // 모달 외부 클릭시 닫기
+        window.onclick = function(event) {
+            const modal = document.getElementById('jobModal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        }
+
+        // ESC 키로 모달 닫기
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeModal();
+            }
+        });
+
+        // 페이지 로드시 자동 실행
+        window.addEventListener('DOMContentLoaded', function() {
+            console.log('페이지 로드됨');
+            loadJobs(); // 자동으로 데이터 로드
+        });
+    </script>
+</body>
+</html>

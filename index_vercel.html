@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>공공기관 채용정보</title>
+    <link rel="icon" href="data:,">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #f5f6fa 0%, #e8eaf0 100%);
+            color: #2c3e50;
+            line-height: 1.6;
+        }
+
+        /* 헤더 */
+        .header {
+            background: #ffffff;
+            color: #1565c0;
+            padding: 30px 0 40px 0;
+            text-align: center;
+            border-bottom: 1px solid #e0e0e0;
+            margin-bottom: 40px;
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .title-highlight {
+            color: #1e3a8a;
+            font-weight: 800;
+        }
+        
+        .title-main {
+            color: #3b82f6;
+            font-weight: 800;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .load-btn {
+            padding: 12px 24px;
+            background: #2ed573;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .jobs-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            gap: 25px;
+            margin-bottom: 50px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #64748b;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 50px;
+            font-size: 18px;
+            color: #64748b;
+        }
+
+        .spinner {
+            border: 4px solid #f3f4f6;
+            border-top: 4px solid #3b82f6;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- 헤더 -->
+    <div class="header">
+        <div class="header-content">
+            <div>
+                <h1>🏢 <span class="title-highlight">대한민국</span> <span class="title-main">공공기관</span> <span class="title-highlight">채용정보</span></h1>
+                <p>공공기관 채용정보를 한눈에 확인하세요</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 메인 컨테이너 -->
+    <div class="container">
+        <div style="text-align: center; margin: 20px 0;">
+            <button class="load-btn" onclick="loadJobs()">
+                📥 채용정보 불러오기
+            </button>
+        </div>
+
+        <!-- 채용공고 그리드 -->
+        <div class="jobs-grid" id="jobsGrid">
+            <div class="empty-state">
+                <h3>📋 채용정보를 불러와주세요</h3>
+                <p>상단의 '채용정보 불러오기' 버튼을 클릭하여 최신 공고를 확인하세요.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Vercel API 기본 URL
+        const API_BASE_URL = window.location.hostname.includes('vercel.app') 
+            ? window.location.origin 
+            : 'http://localhost:8001';
+
+        console.log('API Base URL:', API_BASE_URL);
+
+        // 채용정보 불러오기
+        async function loadJobs() {
+            const jobsGrid = document.getElementById('jobsGrid');
+            
+            jobsGrid.innerHTML = '<div class="loading"><div class="spinner"></div>채용정보를 불러오는 중입니다...</div>';
+            
+            try {
+                // API 테스트
+                const response = await fetch(`${API_BASE_URL}/api/jobs?limit=50`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const jobs = await response.json();
+                console.log('Loaded jobs:', jobs.length);
+                
+                // 데이터 표시
+                if (jobs.length > 0) {
+                    displayJobs(jobs);
+                } else {
+                    jobsGrid.innerHTML = '<div class="empty-state"><h3>📭 등록된 채용공고가 없습니다</h3></div>';
+                }
+                
+            } catch (error) {
+                console.error('API 호출 실패:', error);
+                jobsGrid.innerHTML = `
+                    <div class="empty-state">
+                        <h3>⚠️ 연결 실패</h3>
+                        <p>API 서버에 연결할 수 없습니다.</p>
+                        <p style="color: #666; font-size: 14px; margin-top: 10px;">
+                            ${error.message}
+                        </p>
+                    </div>
+                `;
+            }
+        }
+
+        // 채용공고 표시
+        function displayJobs(jobs) {
+            const jobsGrid = document.getElementById('jobsGrid');
+            
+            const jobCards = jobs.slice(0, 20).map(job => `
+                <div style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                    <h3 style="color: #1565c0; margin-bottom: 10px; font-size: 16px;">${job.title || '제목 없음'}</h3>
+                    <p style="color: #666; margin-bottom: 8px;">🏢 ${job.dept_name || '기관명 없음'}</p>
+                    <p style="color: #666; margin-bottom: 8px;">📍 ${job.work_region || '지역 정보 없음'}</p>
+                    <p style="color: #666; margin-bottom: 8px;">👥 ${job.recruit_num || '?'}명 채용</p>
+                    <p style="color: #888; font-size: 12px;">등록: ${job.reg_date || '날짜 없음'} | 마감: ${job.end_date || '날짜 없음'}</p>
+                </div>
+            `).join('');
+            
+            jobsGrid.innerHTML = jobCards;
+        }
+
+        // 페이지 로드시 자동 실행
+        window.addEventListener('DOMContentLoaded', function() {
+            console.log('페이지 로드됨');
+            // 자동으로 데이터 로드하지 않음 (사용자가 버튼 클릭)
+        });
+    </script>
+</body>
+</html>

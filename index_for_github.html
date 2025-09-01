@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏛️ 대한민국 공공기관 채용정보</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .container {
+            background: white;
+            padding: 50px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            text-align: center;
+            max-width: 600px;
+        }
+        h1 {
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+        p { 
+            color: #666;
+            margin: 20px 0;
+            line-height: 1.6;
+        }
+        .features {
+            background: #f7f7f7;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 30px 0;
+            text-align: left;
+        }
+        .features li {
+            margin: 10px 0;
+            list-style: none;
+            padding-left: 20px;
+        }
+        .features li:before {
+            content: "✅ ";
+            margin-left: -20px;
+        }
+        .status {
+            background: #10b981;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            display: inline-block;
+            margin: 20px 0;
+            font-weight: bold;
+        }
+        .info {
+            background: #fef3c7;
+            border: 2px solid #fbbf24;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏛️ 대한민국 공공기관 채용정보</h1>
+        <p>공공기관 채용정보를 실시간으로 수집하여 제공합니다</p>
+        
+        <div class="status">
+            🤖 GitHub Actions 자동화 시스템 작동 중
+        </div>
+        
+        <div class="features">
+            <strong>✨ 주요 기능:</strong>
+            <ul>
+                <li>매 5분마다 신규 채용공고 자동 수집</li>
+                <li>30일 지난 공고 자동 삭제</li>
+                <li>완전한 첨부파일 다운로드 지원</li>
+                <li>Firebase Firestore 실시간 연동</li>
+                <li>반응형 카드형 UI 디자인</li>
+            </ul>
+        </div>
+        
+        <div class="info">
+            <strong>📍 접속 정보:</strong><br>
+            현재 데이터 수집 및 처리는 GitHub Actions를 통해<br>
+            백그라운드에서 자동으로 진행되고 있습니다.<br><br>
+            <strong>Last Update:</strong> <span id="lastUpdate"></span>
+        </div>
+        
+        <p style="color: #999; font-size: 14px;">
+            GitHub Repository: GANGHOON-77/public_int<br>
+            Powered by GitHub Actions + Firebase
+        </p>
+    </div>
+    
+    <script>
+        // 현재 시간 표시
+        document.getElementById('lastUpdate').textContent = new Date().toLocaleString('ko-KR');
+        
+        // 5초마다 시간 업데이트
+        setInterval(() => {
+            document.getElementById('lastUpdate').textContent = new Date().toLocaleString('ko-KR');
+        }, 5000);
+    </script>
+</body>
+</html>
