@@ -41,35 +41,27 @@ try:
     
     # 이미 초기화되어 있는지 확인
     if not firebase_admin._apps:
-        # 로컬: 기존 JSON 파일 사용 (우선)
-        json_key_file = "job-pubint-firebase-adminsdk-fbsvc-8a7f28a86e.json"
-        if os.path.exists(json_key_file):
-            cred = credentials.Certificate(json_key_file)
+        # Vercel 환경: 환경변수에서 Firebase 키 읽기
+        firebase_key_env = os.getenv('FIREBASE_KEY')
+        if firebase_key_env:
+            import json
+            import tempfile
+            print("Vercel 환경: 환경변수에서 Firebase 키 읽기")
+            firebase_config = json.loads(firebase_key_env)
+            
+            # 임시 JSON 파일 생성
+            with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as temp_f:
+                json.dump(firebase_config, temp_f)
+                temp_path = temp_f.name
+            
+            cred = credentials.Certificate(temp_path)
+            print("Vercel Firebase 키 로드 성공")
+        # 로컬: 기존 JSON 파일 사용
+        elif os.path.exists("job-pubint-firebase-adminsdk-fbsvc-8a7f28a86e.json"):
+            cred = credentials.Certificate("job-pubint-firebase-adminsdk-fbsvc-8a7f28a86e.json")
             print("로컬 Firebase JSON 키 파일 사용")
         else:
-            # Vercel: 텍스트 파일에서 Firebase 설정 읽기 (대안)
-            config_file = "firebase-key-config.txt"
-            print(f"Looking for config file: {config_file}")
-            print(f"Config file exists: {os.path.exists(config_file)}")
-            
-            if os.path.exists(config_file):
-                import json
-                import tempfile
-                print("Reading Firebase config from text file...")
-                with open(config_file, 'r') as f:
-                    firebase_config = json.loads(f.read())
-                
-                print("Creating temporary JSON file...")
-                # 임시 JSON 파일 생성
-                with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as temp_f:
-                    json.dump(firebase_config, temp_f)
-                    temp_path = temp_f.name
-                
-                print(f"Temporary file created: {temp_path}")
-                cred = credentials.Certificate(temp_path)
-                print("Firebase 설정 파일에서 로드됨")
-            else:
-                raise Exception("Firebase 키 파일을 찾을 수 없습니다")
+            raise Exception("Firebase 키를 찾을 수 없습니다 (환경변수 또는 파일)")
             
         firebase_admin.initialize_app(cred)
         print("Firebase 초기화 성공")
