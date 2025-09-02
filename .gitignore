@@ -1,0 +1,4 @@
+job-pubint-firebase-adminsdk-fbsvc-*.json
+github_pat_*.txt
+
+.vercel
