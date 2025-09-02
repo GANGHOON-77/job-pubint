@@ -1,40 +1,40 @@
 name: 자동 채용공고 업데이트
 
-  on:
-    schedule:
-      # 5분마다 실행
-      - cron: '*/5 * * * *'
-    workflow_dispatch:
+on:
+  schedule:
+    # 5분마다 실행
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
 
-  jobs:
-    update-jobs:
-      runs-on: ubuntu-latest
-
-      steps:
-      - name: 코드 체크아웃
-        uses: actions/checkout@v4
-
-      - name: Python 설정
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.12'
-
-      - name: 의존성 설치
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-
-      - name: Firebase 키 설정
-        run: |
-          echo '${{ secrets.FIREBASE_KEY }}' > job-pubint-firebase-adminsdk-fbsvc-8a7f28a86e.json
-
-      - name: 채용공고 업데이트 실행
-        run: |
-          python auto_update_jobs.py
-
-      - name: 로그 확인
-        run: |
-          if [ -f update_log.txt ]; then
-            echo "=== 업데이트 로그 ==="
-            cat update_log.txt
-          fi
+jobs:
+  update-jobs:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 코드 체크아웃
+      uses: actions/checkout@v4
+      
+    - name: Python 설정
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.12'
+        
+    - name: 의존성 설치
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        
+    - name: Firebase 키 설정
+      run: |
+        echo '${{ secrets.FIREBASE_KEY }}' > job-pubint-firebase-adminsdk-fbsvc-8a7f28a86e.json
+        
+    - name: 채용공고 업데이트 실행
+      run: |
+        python auto_update_jobs.py
+        
+    - name: 로그 확인
+      run: |
+        if [ -f update_log.txt ]; then
+          echo "=== 업데이트 로그 ==="
+          cat update_log.txt
+        fi
