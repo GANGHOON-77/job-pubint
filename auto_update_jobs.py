@@ -1,8 +1,6 @@
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-GitHub Actions용 자동 채용공고 업데이트 스크립트
-5분마다 실행되어 신규 게시글 수집 및 15일 초과 게시글 삭제
-"""
+
 import sys
 import os
 import requests
@@ -10,54 +8,47 @@ import json
 from datetime import datetime, timedelta
 import firebase_admin
 from firebase_admin import credentials, firestore
-from data_collector import DataCollector
+from data_collector import PublicJobCollector  # ✅ 수정됨: DataCollector → PublicJobCollector
 import logging
 
-# 로깅 설정
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.FileHandler('update_log.txt', encoding='utf-8'),
-        logging.StreamHandler(sys.stdout)
-    ]
-)
+def setup_logging():
+    """로깅 설정"""
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(asctime)s - %(levelname)s - %(message)s',
+        handlers=[
+            logging.FileHandler('update_log.txt', encoding='utf-8'),
+            logging.StreamHandler(sys.stdout)
+        ]
+    )
 
 def initialize_firebase():
     """Firebase 초기화"""
     try:
         if not firebase_admin._apps:
-            # GitHub Actions 환경에서는 키 파일이 생성됨
-            key_file = "job-pubint-firebase-adminsdk-fbsvc-8a7f28a86e.json"
-            if os.path.exists(key_file):
-                cred = credentials.Certificate(key_file)
-                firebase_admin.initialize_app(cred)
-                logging.info("Firebase 초기화 성공")
+            # GitHub Actions 환경에서는 환경변수로 Firebase 키를 설정
+            firebase_key = os.environ.get('FIREBASE_KEY')
+            if firebase_key:
+                # JSON 문자열을 파일로 저장
+                with open('firebase_key.json', 'w', encoding='utf-8') as f:
+                    f.write(firebase_key)
+                cred = credentials.Certificate('firebase_key.json')
             else:
-                raise Exception("Firebase 키 파일을 찾을 수 없습니다")
+                # 로컬 환경에서는 키 파일 사용
+                cred = credentials.Certificate('job-pubint-firebase-adminsdk-fbsvc-8a7f28a86e.json')
+            
+            firebase_admin.initialize_app(cred)
+            logging.info("Firebase 초기화 성공")
         
         return firestore.client()
     except Exception as e:
         logging.error(f"Firebase 초기화 실패: {e}")
         return None
 
-def get_existing_job_ids(db):
-    """기존 Firebase에 저장된 채용공고 ID 목록 가져오기"""
-    try:
-        docs = db.collection('recruitment_jobs').stream()
-        existing_ids = set()
-        for doc in docs:
-            existing_ids.add(doc.id)
-        logging.info(f"기존 채용공고 {len(existing_ids)}개 확인")
-        return existing_ids
-    except Exception as e:
-        logging.error(f"기존 데이터 조회 실패: {e}")
-        return set()
-
 def collect_new_jobs():
     """새로운 채용공고 수집"""
     try:
-        collector = DataCollector()
+        collector = PublicJobCollector()  # ✅ 수정됨: DataCollector() → PublicJobCollector()
         # 최근 1일 데이터만 수집 (신규 확인용)
         new_jobs = collector.collect_data(days_ago=1, save_to_file=False)
         logging.info(f"API에서 {len(new_jobs)}개 채용공고 수집")
@@ -66,51 +57,80 @@ def collect_new_jobs():
         logging.error(f"새 데이터 수집 실패: {e}")
         return []
 
-def save_new_jobs_to_firebase(db, new_jobs, existing_ids):
-    """신규 채용공고만 Firebase에 저장"""
-    new_count = 0
+def save_new_jobs_to_firebase(db, new_jobs):
+    """새로운 채용공고를 Firebase에 저장"""
+    if not new_jobs:
+        logging.info("저장할 새로운 채용공고가 없습니다")
+        return 0
+    
+    saved_count = 0
+    collection_ref = db.collection('recruitment_jobs')
     
     for job in new_jobs:
-        job_id = job['idx']
-        
-        if job_id not in existing_ids:
-            try:
-                # 신규 채용공고 저장
-                doc_ref = db.collection('recruitment_jobs').document(job_id)
-                job['created_at'] = datetime.now()
-                job['updated_at'] = datetime.now()
-                job['status'] = 'active'
-                
-                doc_ref.set(job)
-                new_count += 1
-                logging.info(f"신규 채용공고 저장: {job_id} - {job.get('title', 'N/A')}")
-                
-            except Exception as e:
-                logging.error(f"채용공고 저장 실패 ({job_id}): {e}")
+        try:
+            # 고유 ID로 중복 확인
+            job_id = job.get('id') or job.get('pblntfPblancId', 'unknown')
+            
+            # 이미 존재하는지 확인
+            existing_doc = collection_ref.where('pblntfPblancId', '==', job_id).limit(1).get()
+            
+            if not existing_doc:
+                # 새로운 문서 추가
+                job_data = {
+                    **job,
+                    'created_at': datetime.now(),
+                    'updated_at': datetime.now(),
+                    'status': 'active'
+                }
+                collection_ref.add(job_data)
+                saved_count += 1
+                logging.info(f"새 채용공고 저장: {job.get('instNm', '기관명 없음')} - {job.get('ncsCdNmLst', '제목 없음')}")
+            
+        except Exception as e:
+            logging.error(f"채용공고 저장 실패: {e}")
     
-    logging.info(f"총 {new_count}개의 신규 채용공고 저장 완료")
-    return new_count
+    logging.info(f"총 {saved_count}개 새로운 채용공고 저장 완료")
+    return saved_count
 
-def delete_old_jobs(db, days_threshold=15):
-    """15일 이상 된 채용공고 삭제"""
+def delete_old_jobs(db):
+    """15일 이상된 오래된 채용공고 삭제 (단, 마감일이 지나지 않은 경우 유지)"""
     try:
-        cutoff_date = datetime.now() - timedelta(days=days_threshold)
+        collection_ref = db.collection('recruitment_jobs')
+        cutoff_date = datetime.now() - timedelta(days=15)
         
-        # 15일 전 데이터 조회
-        old_jobs_query = db.collection('recruitment_jobs').where(
-            'created_at', '<', cutoff_date
-        ).stream()
+        # 15일 이전에 생성된 문서들 조회
+        old_docs = collection_ref.where('created_at', '<', cutoff_date).get()
         
         deleted_count = 0
-        for doc in old_jobs_query:
-            try:
-                doc.reference.delete()
-                deleted_count += 1
-                logging.info(f"오래된 채용공고 삭제: {doc.id}")
-            except Exception as e:
-                logging.error(f"채용공고 삭제 실패 ({doc.id}): {e}")
+        kept_count = 0
         
-        logging.info(f"총 {deleted_count}개의 오래된 채용공고 삭제 완료")
+        for doc in old_docs:
+            doc_data = doc.to_dict()
+            
+            # 마감일 확인
+            end_date_str = doc_data.get('pbancEndYmd') or doc_data.get('rcritEndDt')
+            
+            if end_date_str:
+                try:
+                    # 날짜 형식 변환 (YYYYMMDD 또는 YYYY-MM-DD)
+                    if len(end_date_str) == 8 and end_date_str.isdigit():
+                        end_date = datetime.strptime(end_date_str, '%Y%m%d')
+                    else:
+                        end_date = datetime.strptime(end_date_str[:10], '%Y-%m-%d')
+                    
+                    # 마감일이 지나지 않았으면 유지
+                    if end_date > datetime.now():
+                        kept_count += 1
+                        continue
+                        
+                except ValueError:
+                    pass  # 날짜 파싱 실패 시 삭제 진행
+            
+            # 오래된 문서 삭제
+            doc.reference.delete()
+            deleted_count += 1
+        
+        logging.info(f"15일 이상된 채용공고 {deleted_count}개 삭제, {kept_count}개 유지 (마감일 미경과)")
         return deleted_count
         
     except Exception as e:
@@ -118,64 +138,63 @@ def delete_old_jobs(db, days_threshold=15):
         return 0
 
 def get_current_stats(db):
-    """현재 통계 정보 조회"""
+    """현재 채용공고 통계 조회"""
     try:
-        total_docs = list(db.collection('recruitment_jobs').stream())
-        total_count = len(total_docs)
+        collection_ref = db.collection('recruitment_jobs')
+        total_count = len(collection_ref.get())
         
-        # 오늘 등록된 공고 수
-        today_start = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
-        new_today = db.collection('recruitment_jobs').where(
-            'created_at', '>=', today_start
-        ).stream()
-        new_count = len(list(new_today))
+        # 활성 상태 문서 수
+        active_count = len(collection_ref.where('status', '==', 'active').get())
         
-        logging.info(f"현재 총 {total_count}개 채용공고, 오늘 신규 {new_count}개")
-        return total_count, new_count
-        
+        return {
+            'total': total_count,
+            'active': active_count
+        }
     except Exception as e:
         logging.error(f"통계 조회 실패: {e}")
-        return 0, 0
+        return {'total': 0, 'active': 0}
 
 def main():
     """메인 실행 함수"""
+    setup_logging()
     logging.info("=== 자동 채용공고 업데이트 시작 ===")
     
     # Firebase 초기화
     db = initialize_firebase()
     if not db:
         logging.error("Firebase 연결 실패로 종료")
-        return
+        sys.exit(1)
     
     try:
-        # 1. 기존 데이터 확인
-        existing_ids = get_existing_job_ids(db)
-        
-        # 2. 새로운 채용공고 수집
+        # 1. 새로운 채용공고 수집
+        logging.info("1. 새로운 채용공고 수집 시작")
         new_jobs = collect_new_jobs()
-        if not new_jobs:
-            logging.info("수집된 새 데이터가 없습니다")
         
-        # 3. 신규 채용공고 저장
-        new_saved = save_new_jobs_to_firebase(db, new_jobs, existing_ids)
+        # 2. Firebase에 새 데이터 저장
+        logging.info("2. Firebase에 새 데이터 저장 시작")
+        saved_count = save_new_jobs_to_firebase(db, new_jobs)
         
-        # 4. 오래된 채용공고 삭제
-        deleted_count = delete_old_jobs(db, days_threshold=15)
+        # 3. 오래된 데이터 삭제
+        logging.info("3. 오래된 데이터 삭제 시작")
+        deleted_count = delete_old_jobs(db)
         
-        # 5. 현재 상태 확인
-        total_count, today_new = get_current_stats(db)
+        # 4. 현재 통계 확인
+        stats = get_current_stats(db)
         
-        # 6. 업데이트 요약
+        # 결과 요약
         logging.info("=== 업데이트 완료 ===")
-        logging.info(f"신규 저장: {new_saved}개")
-        logging.info(f"오래된 삭제: {deleted_count}개")
-        logging.info(f"현재 총 채용공고: {total_count}개")
-        logging.info(f"오늘 신규 채용공고: {today_new}개")
+        logging.info(f"수집된 새 채용공고: {len(new_jobs)}개")
+        logging.info(f"저장된 새 채용공고: {saved_count}개")
+        logging.info(f"삭제된 오래된 채용공고: {deleted_count}개")
+        logging.info(f"현재 총 채용공고 수: {stats['total']}개 (활성: {stats['active']}개)")
         
+        # 임시 파일 정리
+        if os.path.exists('firebase_key.json'):
+            os.remove('firebase_key.json')
+            
     except Exception as e:
-        logging.error(f"업데이트 과정에서 오류 발생: {e}")
-    
-    logging.info("=== 자동 채용공고 업데이트 종료 ===")
+        logging.error(f"실행 중 오류 발생: {e}")
+        sys.exit(1)
 
 if __name__ == "__main__":
     main()
