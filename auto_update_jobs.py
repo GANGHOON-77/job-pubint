@@ -6,6 +6,7 @@ import os
 import requests
 import json
 from datetime import datetime, timedelta
+import pytz
 import firebase_admin
 from firebase_admin import credentials, firestore
 from data_collector import PublicJobCollector  # ✅ 수정됨: DataCollector → PublicJobCollector
@@ -93,12 +94,21 @@ def save_new_jobs_to_firebase(db, new_jobs):
     return saved_count
 
 def delete_old_jobs(db):
-    """15일 이상된 오래된 채용공고 삭제 (단, 마감일이 지나지 않은 경우 유지)"""
+    """30일 이상된 오래된 채용공고 삭제 (단, 마감일이 지나지 않은 경우 유지)"""
     try:
-        collection_ref = db.collection('recruitment_jobs')
-        cutoff_date = datetime.now() - timedelta(days=15)
+        # 서울 시간대로 현재 시간 확인
+        korea_tz = pytz.timezone('Asia/Seoul')
+        now_korea = datetime.now(korea_tz)
         
-        # 15일 이전에 생성된 문서들 조회
+        # 서울 시간으로 오늘 0시가 아니면 삭제하지 않음
+        if now_korea.hour != 0:
+            logging.info(f"현재 서울 시간 {now_korea.hour}시 - 삭제는 매일 0시에만 실행")
+            return 0
+            
+        collection_ref = db.collection('recruitment_jobs')
+        cutoff_date = now_korea.replace(tzinfo=None) - timedelta(days=30)
+        
+        # 30일 이전에 생성된 문서들 조회
         old_docs = collection_ref.where('created_at', '<', cutoff_date).get()
         
         deleted_count = 0
@@ -119,7 +129,7 @@ def delete_old_jobs(db):
                         end_date = datetime.strptime(end_date_str[:10], '%Y-%m-%d')
                     
                     # 마감일이 지나지 않았으면 유지
-                    if end_date > datetime.now():
+                    if end_date > now_korea.replace(tzinfo=None):
                         kept_count += 1
                         continue
                         
@@ -130,7 +140,7 @@ def delete_old_jobs(db):
             doc.reference.delete()
             deleted_count += 1
         
-        logging.info(f"15일 이상된 채용공고 {deleted_count}개 삭제, {kept_count}개 유지 (마감일 미경과)")
+        logging.info(f"30일 이상된 채용공고 {deleted_count}개 삭제, {kept_count}개 유지 (마감일 미경과)")
         return deleted_count
         
     except Exception as e:
