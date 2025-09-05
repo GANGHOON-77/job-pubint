@@ -1,8 +1,11 @@
 fastapi
-uvicorn
+uvicorn[standard]
 firebase-admin==6.2.0
 google-cloud-firestore==2.11.1
 pydantic
 requests
 beautifulsoup4
 pytz
+python-multipart
+jinja2
+aiofiles
