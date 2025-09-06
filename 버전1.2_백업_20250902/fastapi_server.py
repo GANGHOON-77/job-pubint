@@ -13,7 +13,11 @@ from typing import Optional, List, Dict, Any
 from datetime import datetime, timedelta
 import uvicorn
 from pydantic import BaseModel
-from attachment_collector import AttachmentCollector
+try:
+    from attachment_collector import AttachmentCollector
+except ImportError:
+    AttachmentCollector = None
+    print("AttachmentCollector not available")
 
 app = FastAPI(
     title="공공기관 채용정보 API",
@@ -30,26 +34,52 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Firebase 초기화
+# Firebase 초기화 (Vercel과 로컬 호환)
 try:
+    print(f"Current working directory: {os.getcwd()}")
+    print(f"Files in directory: {os.listdir('.')}")
+    
     # 이미 초기화되어 있는지 확인
     if not firebase_admin._apps:
-        cred = credentials.Certificate("job-pubint-firebase-adminsdk-fbsvc-1c4c2dbd08.json")
+        # Vercel 환경: 환경변수에서 Firebase 키 읽기
+        firebase_key_env = os.getenv('FIREBASE_KEY')
+        if firebase_key_env:
+            import json
+            import tempfile
+            print("Vercel 환경: 환경변수에서 Firebase 키 읽기")
+            firebase_config = json.loads(firebase_key_env)
+            
+            # 임시 JSON 파일 생성
+            with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as temp_f:
+                json.dump(firebase_config, temp_f)
+                temp_path = temp_f.name
+            
+            cred = credentials.Certificate(temp_path)
+            print("Vercel Firebase 키 로드 성공")
+        # 로컬: 기존 JSON 파일 사용
+        elif os.path.exists("job-pubint-firebase-adminsdk-fbsvc-8a7f28a86e.json"):
+            cred = credentials.Certificate("job-pubint-firebase-adminsdk-fbsvc-8a7f28a86e.json")
+            print("로컬 Firebase JSON 키 파일 사용")
+        else:
+            raise Exception("Firebase 키를 찾을 수 없습니다 (환경변수 또는 파일)")
+            
         firebase_admin.initialize_app(cred)
         print("Firebase 초기화 성공")
     else:
         print("Firebase 이미 초기화됨")
     db = firestore.client()
-    print("Firebase 연겴 성공")
+    print("Firebase 연결 성공")
 except Exception as e:
-    print(f"Firebase 연겴 실패: {e}")
+    print(f"Firebase 연결 실패: {e}")
     db = None
 
-# 첫부파일 코렉터 초기화
+# 첨부파일 컬렉터 초기화
 attachment_collector = None
-if db:
+if db and AttachmentCollector:
     try:
-        attachment_collector = AttachmentCollector("job-pubint-firebase-adminsdk-fbsvc-1c4c2dbd08.json")
+        # 환경 변수 또는 로컬 파일 사용
+        key_path = os.getenv('FIREBASE_KEY_PATH', "job-pubint-firebase-adminsdk-fbsvc-8a7f28a86e.json")
+        attachment_collector = AttachmentCollector(key_path)
         print("AttachmentCollector 초기화 성공")
     except Exception as e:
         print(f"AttachmentCollector 초기화 실패: {e}")
@@ -141,7 +171,9 @@ async def get_jobs(
     active_only: bool = Query(default=True, description="진행중 공고만 조회")
 ):
     """채용공고 목록 조회"""
+    print(f"Jobs API called with params: limit={limit}, days={days}, search={search}")
     if not db:
+        print("Firebase db is None - connection failed")
         raise HTTPException(status_code=503, detail="Firebase 연결 오류")
     
     try:

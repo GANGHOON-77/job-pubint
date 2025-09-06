@@ -842,7 +842,7 @@
                 console.log('🔄 FastAPI 서버에서 데이터 로드 시작...');
                 
                 // FastAPI 서버에서 채용공고 데이터 가져오기
-                const jobsResponse = await fetch('/api/jobs?limit=300');
+                const jobsResponse = await fetch('http://localhost:8002/api/jobs?limit=300');
                 if (!jobsResponse.ok) {
                     throw new Error(`HTTP error! status: ${jobsResponse.status}`);
                 }
@@ -879,7 +879,7 @@
         // 통계 데이터 로드
         async function loadStats() {
             try {
-                const statsResponse = await fetch('/api/stats');
+                const statsResponse = await fetch('http://localhost:8002/api/stats');
                 if (statsResponse.ok) {
                     const stats = await statsResponse.json();
                     document.getElementById('totalCount').textContent = stats.total_count;

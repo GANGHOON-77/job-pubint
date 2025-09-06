@@ -27,7 +27,7 @@ app.add_middleware(
 
 # Firebase 초기화
 try:
-    cred = credentials.Certificate("info-gov-firebase-adminsdk-9o52l-f6b59e8ae8.json")
+    cred = credentials.Certificate("firebase_credentials_v1.json")
     firebase_admin.initialize_app(cred)
     db = firestore.client()
     print("Firebase 연결 성공")

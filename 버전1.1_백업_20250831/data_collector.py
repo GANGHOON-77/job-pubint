@@ -138,27 +138,28 @@ class PublicJobCollector:
     def clean_and_process_job(self, job_data):
         """채용 데이터 정리 및 처리"""
         try:
-            # 필수 필드 매핑
+            # 필수 필드 매핑 (구버전 API 필드명 유지)
             processed_job = {
-                'idx': str(job_data.get('empmnsnIdx', '')),  # 채용공시번호
-                'title': str(job_data.get('empmnsnTitle', '')).strip(),  # 채용제목
-                'dept_name': str(job_data.get('deptName', '')).strip(),  # 기관명
-                'work_region': str(job_data.get('workRegion', '')).strip(),  # 근무지
-                'employment_type': self.map_employment_type(job_data.get('empmnsnType', '')),  # 고용형태
-                'reg_date': self.parse_date(job_data.get('regDate', '')),  # 등록일
-                'end_date': self.parse_date(job_data.get('endDate', '')),  # 마감일
-                'recruit_num': self.parse_number(job_data.get('recruitNum', '0')),  # 채용인원
-                'recruit_type': self.map_recruit_type(job_data.get('recruitType', '')),  # 채용형태
+                'idx': str(job_data.get('recrutPblntSn', '')),  # 채용공시번호
+                'title': str(job_data.get('recrutPbancTtl', '')).strip(),  # 채용제목
+                'dept_name': str(job_data.get('instNm', '')).strip(),  # 기관명
+                'work_region': str(job_data.get('workRgnNmLst', '')).strip(),  # 근무지
+                'employment_type': self.map_employment_type(job_data.get('hireTypeNmLst', '')),  # 고용형태
+                'reg_date': self.parse_date(job_data.get('pbancBgngYmd', '')),  # 공고시작일
+                'end_date': self.parse_date(job_data.get('pbancEndYmd', '')),  # 공고종료일
+                'recruit_num': self.parse_number(job_data.get('recrutNope', '0')),  # 채용인원
+                'recruit_type': self.map_recruit_type(job_data.get('recrutSeNm', '')),  # 채용구분
                 
-                # 추가 정보
-                'ncs_category': str(job_data.get('ncsCategory', '')).strip(),  # NCS분류
-                'education': str(job_data.get('education', '')).strip(),  # 학력정보
-                'work_field': str(job_data.get('workField', '')).strip(),  # 근무분야
-                'salary_info': str(job_data.get('salaryInfo', '회사내규에 따름')).strip(),  # 급여정보
-                'preference': str(job_data.get('preference', '')).strip(),  # 우대조건
-                'detail_content': str(job_data.get('detailContent', '')).strip(),  # 상세내용
-                'contact_info': str(job_data.get('contactInfo', '')).strip(),  # 문의처
-                'attachments': self.get_job_attachments(str(job_data.get('empmnsnIdx', ''))),  # 첨부파일 정보
+                # 추가 정보 
+                'ncs_category': str(job_data.get('ncsCdNmLst', '')).strip(),  # NCS분류
+                'education': str(job_data.get('acbgCondNmLst', '')).strip(),  # 학력정보
+                'work_field': str(job_data.get('ncsCdNmLst', '')).strip(),  # 근무분야
+                'salary_info': '회사내규에 따름',  # 급여정보
+                'preference': str(job_data.get('prefCondCn', '')).strip(),  # 우대조건
+                'detail_content': self.get_detailed_content(job_data),  # 상세 내용 조합
+                'contact_info': '',  # 문의처
+                'attachments': self.get_job_attachments(str(job_data.get('recrutPblntSn', ''))),  # 첨부파일 정보
+                'src_url': str(job_data.get('srcUrl', '')),  # 채용공고 URL
                 
                 # 메타데이터
                 'created_at': datetime.now().isoformat(),
@@ -234,6 +235,74 @@ class PublicJobCollector:
         except:
             return 1
     
+    def get_detailed_content(self, job_data):
+        """실제 공고 페이지에서 상세요강 전체보기 내용 스크래핑"""
+        job_idx = str(job_data.get('recrutPblntSn', ''))
+        if not job_idx:
+            return str(job_data.get('aplyQlfcCn', '')).strip()
+        
+        try:
+            # 채용공고 상세 페이지 URL
+            detail_url = f"https://job.alio.go.kr/recruitview.do?idx={job_idx}"
+            
+            headers = {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+            }
+            
+            response = requests.get(detail_url, headers=headers, timeout=15)
+            response.raise_for_status()
+            
+            soup = BeautifulSoup(response.text, 'html.parser')
+            
+            # 상세요강 전체보기 내용 추출 (test_scrape_detail.py에서 검증된 방법 사용)
+            detail_content = ""
+            
+            # 가능한 모든 클래스명으로 시도
+            possible_selectors = [
+                'div[class*="content"]',
+                'div.recruitView_left',
+                'div.recruit_view_left', 
+                'div.detail_content',
+                'div.content_left',
+                'div.left_content',
+                '.recruitview_left',
+                '.recruit-view-left',
+                'div[class*="left"]',
+                'div[class*="detail"]'
+            ]
+            
+            for selector in possible_selectors:
+                elements = soup.select(selector)
+                if elements:
+                    for element in elements:
+                        text = element.get_text(separator='\n', strip=True)
+                        if text and len(text) > 50:  # 의미있는 내용이 있는지 확인
+                            detail_content = text
+                            break
+                    if detail_content:
+                        break
+            
+            # 내용이 없으면 API 기본값 사용
+            if not detail_content or len(detail_content.strip()) < 10:
+                detail_content = str(job_data.get('aplyQlfcCn', '')).strip()
+            
+            print(f"✓ 상세 내용 스크래핑 성공: {job_idx} ({len(detail_content)}자)")
+            return detail_content
+            
+        except Exception as e:
+            print(f"❌ 상세 내용 스크래핑 실패 ({job_idx}): {e}")
+            return str(job_data.get('aplyQlfcCn', '')).strip()
+    
+    def format_date_display(self, date_str):
+        """날짜를 YYYY.MM.DD 형식으로 포맷"""
+        try:
+            if len(date_str) == 8:  # YYYYMMDD
+                return f"{date_str[:4]}.{date_str[4:6]}.{date_str[6:8]}"
+            else:
+                return date_str
+        except:
+            return date_str
+
     def get_job_attachments(self, job_idx):
         """채용공고 페이지에서 첨부파일 정보 크롤링"""
         if not job_idx:
@@ -342,7 +411,7 @@ class PublicJobCollector:
             pass
         return None
     
-    def filter_recent_jobs(self, jobs, days=30):
+    def filter_recent_jobs(self, jobs, days=15):
         """최근 N일 이내 공고만 필터링"""
         if not jobs:
             return []
@@ -356,7 +425,7 @@ class PublicJobCollector:
                     reg_date = datetime.strptime(job['reg_date'], '%Y-%m-%d')
                     end_date = datetime.strptime(job['end_date'], '%Y-%m-%d') if job.get('end_date') else datetime.now() + timedelta(days=30)
                     
-                    # 30일 이내 등록 && 마감일이 지나지 않음
+                    # 15일 이내 등록 && 마감일이 지나지 않음
                     if reg_date >= cutoff_date and end_date >= datetime.now():
                         filtered_jobs.append(job)
             except Exception as e:
@@ -511,6 +580,10 @@ class PublicJobCollector:
             page_duplicate_count = 0
             
             for job_data in jobs_data:
+                # 모든 게시글 처리 (필터 제거)
+                # if job_data.get('ongoingYn') != 'Y':
+                #     continue
+                    
                 # 기본 처리
                 processed_job = self.clean_and_process_job(job_data)
                 if not processed_job:

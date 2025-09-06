@@ -772,22 +772,22 @@
             <div class="stat-card">
                 <div class="stat-number" id="totalCount" onclick="filterByType('total')" title="전체 채용공고 보기">0</div>
                 <div class="stat-label">전체 채용</div>
-                <div class="stat-sublabel">30일 이내</div>
+                <div class="stat-sublabel">(등록 30일)</div>
             </div>
             <div class="stat-card urgent-stat">
                 <div class="stat-number" id="urgentCount" onclick="filterByType('urgent')" title="마감임박 채용공고 보기">0</div>
                 <div class="stat-label">임박</div>
-                <div class="stat-sublabel">마감 3일전</div>
+                <div class="stat-sublabel">(마감 3일전)</div>
             </div>
             <div class="stat-card">
                 <div class="stat-number" id="newCount" onclick="filterByType('new')" title="신규 채용공고 보기">0</div>
                 <div class="stat-label">신규 채용</div>
-                <div class="stat-sublabel">최근 7일</div>
+                <div class="stat-sublabel">(최근 7일)</div>
             </div>
             <div class="stat-card">
                 <div class="stat-number" id="orgCount">0</div>
                 <div class="stat-label">등록기관</div>
-                <div class="stat-sublabel">중복 제외</div>
+                <div class="stat-sublabel">(중복 제외)</div>
             </div>
         </div>
 
@@ -827,7 +827,7 @@
         const itemsPerPage = 12;
         let currentFilter = 'total'; // 현재 적용된 필터
 
-        // FastAPI 서버에서 채용정보 불러오기
+        // FastAPI 서버에서 채용정보 불러오기 (로컬과 동일)
         async function loadJobs() {
             const loadBtn = document.getElementById('loadBtn');
             const jobsGrid = document.getElementById('jobsGrid');
@@ -842,7 +842,7 @@
                 console.log('🔄 FastAPI 서버에서 데이터 로드 시작...');
                 
                 // FastAPI 서버에서 채용공고 데이터 가져오기
-                const jobsResponse = await fetch('http://localhost:8002/api/jobs?limit=300');
+                const jobsResponse = await fetch('/api/jobs?limit=300');
                 if (!jobsResponse.ok) {
                     throw new Error(`HTTP error! status: ${jobsResponse.status}`);
                 }
@@ -850,7 +850,7 @@
                 allJobs = await jobsResponse.json();
                 console.log(`📊 FastAPI 서버에서 총 ${allJobs.length}건 로드됨`);
                 
-                // 데이터를 filteredJobs에 복사 (서버에서 이미 필터링됨)
+                // 데이터를 filteredJobs에 복사
                 filteredJobs = [...allJobs];
                 
                 console.log(`✅ 표시할 공고: ${filteredJobs.length}건`);
@@ -879,7 +879,7 @@
         // 통계 데이터 로드
         async function loadStats() {
             try {
-                const statsResponse = await fetch('http://localhost:8002/api/stats');
+                const statsResponse = await fetch('/api/stats');
                 if (statsResponse.ok) {
                     const stats = await statsResponse.json();
                     document.getElementById('totalCount').textContent = stats.total_count;
@@ -1057,6 +1057,95 @@
             `;
         }
 
+        // 첨부파일 렌더링 함수 (동적 로딩 지원)
+        function renderAttachments(job) {
+            const attachments = job.attachments;
+            
+            // 첨부파일 정보가 없으면 동적 로딩 시도
+            if (!attachments) {
+                return `
+                    <div id="attachments-${job.idx}" style="text-align: center; padding: 20px;">
+                        <div style="margin-bottom: 15px; color: #666;">
+                            📎 첨부파일 정보를 불러오는 중...
+                        </div>
+                        <div style="width: 30px; height: 30px; border: 3px solid #f3f3f3; border-top: 3px solid #667eea; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto;"></div>
+                        <button onclick="loadAttachments('${job.idx}')" style="margin-top: 15px; padding: 8px 16px; background: #667eea; color: white; border: none; border-radius: 6px; cursor: pointer;">
+                            🔄 첨부파일 새로고침
+                        </button>
+                    </div>
+                `;
+            }
+            
+            let html = '<table style="width: 100%; border-collapse: collapse; border: 1px solid #ddd;"><tbody>';
+            
+            // 공고문
+            html += '<tr><td style="padding: 12px; background: #f5f5f5; font-weight: 600; border: 1px solid #ddd; width: 120px;">공고문</td>';
+            if (attachments.announcement && attachments.announcement.fileID) {
+                html += `<td style="padding: 12px; border: 1px solid #ddd;">
+                    <a href="https://www.alio.go.kr/download/download.json?fileNo=${attachments.announcement.fileID}" target="_blank" style="color: #0066cc; text-decoration: none;">
+                        📋 ${attachments.announcement.name || '공고문.pdf'}
+                    </a>
+                </td>`;
+            } else {
+                html += '<td style="padding: 12px; border: 1px solid #ddd; text-align: center; color: #999;">파일 없음</td>';
+            }
+            html += '</tr>';
+            
+            // 입사지원서
+            html += '<tr><td style="padding: 12px; background: #f5f5f5; font-weight: 600; border: 1px solid #ddd;">입사지원서</td>';
+            if (attachments.application && attachments.application.fileID) {
+                html += `<td style="padding: 12px; border: 1px solid #ddd;">
+                    <a href="https://www.alio.go.kr/download/download.json?fileNo=${attachments.application.fileID}" target="_blank" style="color: #0066cc; text-decoration: none;">
+                        📝 ${attachments.application.name || '입사지원서.pdf'}
+                    </a>
+                </td>`;
+            } else {
+                html += '<td style="padding: 12px; border: 1px solid #ddd; text-align: center; color: #999;">파일 없음</td>';
+            }
+            html += '</tr>';
+            
+            // 직무기술서
+            html += '<tr><td style="padding: 12px; background: #f5f5f5; font-weight: 600; border: 1px solid #ddd;">직무기술서</td>';
+            if (attachments.job_description && attachments.job_description.fileID) {
+                html += `<td style="padding: 12px; border: 1px solid #ddd;">
+                    <a href="https://www.alio.go.kr/download/download.json?fileNo=${attachments.job_description.fileID}" target="_blank" style="color: #0066cc; text-decoration: none;">
+                        📄 ${attachments.job_description.name || '직무기술서.pdf'}
+                    </a>
+                </td>`;
+            } else {
+                html += '<td style="padding: 12px; border: 1px solid #ddd; text-align: center; color: #999;">파일 없음</td>';
+            }
+            html += '</tr>';
+            
+            // 기타 첨부파일
+            html += '<tr><td style="padding: 12px; background: #f5f5f5; font-weight: 600; border: 1px solid #ddd;">기타 첨부파일</td>';
+            if (attachments.others && attachments.others.length > 0) {
+                html += '<td style="padding: 12px; border: 1px solid #ddd;">';
+                attachments.others.forEach(file => {
+                    if (file.fileID) {
+                        html += `<div style="margin-bottom: 5px;">
+                            <a href="https://www.alio.go.kr/download/download.json?fileNo=${file.fileID}" target="_blank" style="color: #0066cc; text-decoration: none;">
+                                📎 ${file.name || '기타파일.pdf'}
+                            </a>
+                        </div>`;
+                    }
+                });
+                html += '</td>';
+            } else {
+                html += '<td style="padding: 12px; border: 1px solid #ddd; text-align: center; color: #999;">파일 없음</td>';
+            }
+            html += '</tr>';
+            
+            // 미접수사유
+            if (attachments.unavailable_reason) {
+                html += `<tr><td style="padding: 12px; background: #f5f5f5; font-weight: 600; border: 1px solid #ddd;">미접수사유</td>
+                    <td style="padding: 12px; border: 1px solid #ddd; color: #666;">${attachments.unavailable_reason}</td></tr>`;
+            }
+            
+            html += '</tbody></table>';
+            return html;
+        }
+
         // 상세보기 모달 표시
         function showJobDetail(jobIdx) {
             const job = allJobs.find(j => j.idx === jobIdx);
@@ -1134,26 +1223,53 @@
                     <!-- 오른쪽: 상세 내용 -->
                     <div class="modal-right-panel">
                         <div class="modal-content-section">
-                            <h3>📄 상세요강 전체보기</h3>
+                            <h3>상세요강 전체보기</h3>
                             <div class="modal-content-body">
-                                ${formatDetailContent(job.detail_content || '상세 내용이 없습니다.')}
+                                ${formatDetailContent(job)}
                             </div>
                         </div>
                         
                         <div class="modal-content-section">
                             <h3>📊 전형단계별 채용정보</h3>
                             <div class="modal-content-body">
-                                <p>1차 전형: 서류심사</p>
-                                <p>2차 전형: 필기시험</p>
-                                <p>3차 전형: 면접전형</p>
-                                <p>최종합격자 발표</p>
+                                <table style="width: 100%; border-collapse: collapse; border: 1px solid #e5e7eb;">
+                                    <thead>
+                                        <tr style="background: #f8fafc;">
+                                            <th style="border: 1px solid #e5e7eb; padding: 12px; text-align: center; font-weight: 600;">구분</th>
+                                            <th style="border: 1px solid #e5e7eb; padding: 12px; text-align: center; font-weight: 600;">선발인원</th>
+                                            <th style="border: 1px solid #e5e7eb; padding: 12px; text-align: center; font-weight: 600;">응시인원</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td style="border: 1px solid #e5e7eb; padding: 12px; text-align: center; background: #f9fafb;">1차</td>
+                                            <td style="border: 1px solid #e5e7eb; padding: 12px; text-align: center;">-</td>
+                                            <td style="border: 1px solid #e5e7eb; padding: 12px; text-align: center;">-</td>
+                                        </tr>
+                                        <tr>
+                                            <td style="border: 1px solid #e5e7eb; padding: 12px; text-align: center; background: #f9fafb;">2차</td>
+                                            <td style="border: 1px solid #e5e7eb; padding: 12px; text-align: center;">-</td>
+                                            <td style="border: 1px solid #e5e7eb; padding: 12px; text-align: center;">-</td>
+                                        </tr>
+                                        <tr>
+                                            <td style="border: 1px solid #e5e7eb; padding: 12px; text-align: center; background: #f9fafb;">3차</td>
+                                            <td style="border: 1px solid #e5e7eb; padding: 12px; text-align: center;">-</td>
+                                            <td style="border: 1px solid #e5e7eb; padding: 12px; text-align: center;">-</td>
+                                        </tr>
+                                        <tr>
+                                            <td style="border: 1px solid #e5e7eb; padding: 12px; text-align: center; background: #f9fafb;">최종</td>
+                                            <td style="border: 1px solid #e5e7eb; padding: 12px; text-align: center;">-</td>
+                                            <td style="border: 1px solid #e5e7eb; padding: 12px; text-align: center;">-</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
                         
                         <div class="modal-content-section">
-                            <h3>📎 첨부파일 전체보기</h3>
+                            <h3>첨부파일 전체보기</h3>
                             <div class="modal-content-body">
-                                ${generateAttachmentLinks(job)}
+                                ${renderAttachments(job)}
                             </div>
                         </div>
                     </div>
@@ -1177,14 +1293,10 @@
             document.getElementById('jobModal').style.display = 'none';
         }
 
-        // 지원하기 - 원본 사이트로 이동
+        // 지원하기 - 잡알리오 실제 게시글로 이동
         function applyToJob(jobIdx) {
-            const job = allJobs.find(j => j.idx === jobIdx);
-            if (job && job.src_url) {
-                window.open(job.src_url, '_blank');
-            } else {
-                alert('원본 게시글 URL을 찾을 수 없습니다.');
-            }
+            const alio_url = `https://job.alio.go.kr/recruitview.do?pageNo=1&idx=${jobIdx}&s_date=2025.06.30&e_date=2025.08.31&org_type=&org_name=&search_type=&keyword=&order=REG_DATE&sort=DESC&pageSet=10`;
+            window.open(alio_url, '_blank');
         }
 
         // 북마크 토글
@@ -1291,19 +1403,39 @@
         }
 
         // 상세 내용 포맷팅 (심플한 버전)
-        function formatDetailContent(content) {
-            if (!content || content === '상세 내용이 없습니다.') {
-                return '<p style="color: #9ca3af; font-style: italic;">상세 내용이 제공되지 않았습니다.</p>';
+        function formatDetailContent(job) {
+            if (!job || !job.detail_content) {
+                return '<p style="color: #666; font-style: italic;">상세 내용이 제공되지 않았습니다.</p>';
             }
             
-            return content
-                // \r\n을 <br>로 변환
+            // detail_content를 그대로 보여주되 줄바꿈만 처리
+            let formattedContent = job.detail_content
                 .replace(/\r\n/g, '<br>')
                 .replace(/\n/g, '<br>')
-                // 연속된 <br> 태그 정리 (최대 2개)
                 .replace(/(<br\s*\/?>){3,}/g, '<br><br>')
-                // 시작 부분의 <br> 제거
                 .replace(/^<br>/, '');
+            
+            return `<div style="line-height: 1.6; font-size: 14px; padding: 10px; white-space: pre-wrap;">${formattedContent}</div>`;
+        }
+        
+        function formatJobQualification(content) {
+            if (!content) {
+                return '<p style="color: #666;">자격요건 정보가 제공되지 않았습니다.</p>';
+            }
+            
+            let formattedContent = content
+                .replace(/\r\n/g, '<br>')
+                .replace(/\n/g, '<br>')
+                .replace(/(<br\s*\/?>){2,}/g, '<br><br>')
+                .replace(/^<br>/, '');
+            
+            // 심플한 포맷팅
+            formattedContent = formattedContent
+                .replace(/(\d+\.\s*[^<]+?)(<br>|$)/g, '<p style="font-weight: 600; margin: 10px 0 5px 0;">$1</p>')
+                .replace(/([ㆍ·•-]\s*.+?)(<br>|$)/g, '<p style="margin: 5px 0; padding-left: 15px;">$1</p>')
+                .replace(/(필수요건|자격요건|담당업무)/g, '<strong>$1</strong>');
+            
+            return formattedContent;
         }
 
         // 첨부파일 링크 생성
@@ -1362,6 +1494,7 @@
                 closeModal();
             }
         });
+        
 
         // 체크박스 필터 기능
         function initializeFilters() {
@@ -1430,6 +1563,289 @@
             // 현재는 모든 데이터가 공공기관이므로 필터링 없이 반환
             // 추후 기관 유형별 데이터가 구분되면 여기서 필터링
             return jobs;
+        }
+
+        // 첨부파일 동적 로딩 함수
+        async function loadAttachments(jobIdx) {
+            const attachmentDiv = document.getElementById(`attachments-${jobIdx}`);
+            if (!attachmentDiv) return;
+            
+            try {
+                attachmentDiv.innerHTML = `
+                    <div style="text-align: center; padding: 20px;">
+                        <div style="margin-bottom: 15px; color: #667eea;">
+                            🔍 첨부파일 정보를 수집하는 중...
+                        </div>
+                        <div style="width: 30px; height: 30px; border: 3px solid #f3f3f3; border-top: 3px solid #667eea; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto;"></div>
+                    </div>
+                `;
+                
+                // FastAPI에서 첨부파일 정보 가져오기
+                const response = await fetch(`/api/jobs/${jobIdx}/attachments`);
+                const result = await response.json();
+                
+                if (result.success && result.attachments) {
+                    // 첨부파일 정보가 있으면 테이블 렌더링
+                    const attachmentTable = renderAttachmentTable(result.attachments);
+                    attachmentDiv.innerHTML = attachmentTable;
+                    
+                    // 전역 job 데이터도 업데이트
+                    const job = allJobs.find(j => j.idx === jobIdx);
+                    if (job) {
+                        job.attachments = result.attachments;
+                    }
+                    
+                    console.log(`✅ 첨부파일 로드 완료: ${jobIdx} (${result.source})`);
+                } else {
+                    // 첨부파일 정보가 없음
+                    attachmentDiv.innerHTML = `
+                        <table style="width: 100%; border-collapse: collapse; border: 1px solid #ddd;">
+                            <tbody>
+                                <tr>
+                                    <td style="padding: 12px; background: #f5f5f5; font-weight: 600; border: 1px solid #ddd; text-align: center;">
+                                        📎 첨부파일 정보 없음
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 12px; border: 1px solid #ddd; text-align: center; color: #666;">
+                                        ${result.message || '첨부파일이 없거나 수집할 수 없습니다.'}
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    `;
+                }
+                
+            } catch (error) {
+                console.error(`첨부파일 로드 실패 (${jobIdx}):`, error);
+                attachmentDiv.innerHTML = `
+                    <div style="text-align: center; padding: 20px; color: #e74c3c;">
+                        ❌ 첨부파일 정보 로드 실패<br>
+                        <button onclick="loadAttachments('${jobIdx}')" style="margin-top: 10px; padding: 8px 16px; background: #667eea; color: white; border: none; border-radius: 6px; cursor: pointer;">
+                            🔄 다시 시도
+                        </button>
+                    </div>
+                `;
+            }
+        }
+        
+        // 첨부파일 테이블 렌더링 (기존 코드 재사용)
+        function renderAttachmentTable(attachments) {
+            let html = '<table style="width: 100%; border-collapse: collapse; border: 1px solid #ddd;"><tbody>';
+            
+            // 공고문
+            html += '<tr><td style="padding: 12px; background: #f5f5f5; font-weight: 600; border: 1px solid #ddd; width: 120px;">공고문</td>';
+            if (attachments.announcement && attachments.announcement.fileID) {
+                html += `<td style="padding: 12px; border: 1px solid #ddd;">
+                    <a href="https://www.alio.go.kr/download/download.json?fileNo=${attachments.announcement.fileID}" target="_blank" style="color: #0066cc; text-decoration: none;">
+                        📋 ${attachments.announcement.name || '공고문.pdf'}
+                    </a>
+                </td>`;
+            } else {
+                html += '<td style="padding: 12px; border: 1px solid #ddd; text-align: center; color: #999;">파일 없음</td>';
+            }
+            html += '</tr>';
+            
+            // 입사지원서
+            html += '<tr><td style="padding: 12px; background: #f5f5f5; font-weight: 600; border: 1px solid #ddd;">입사지원서</td>';
+            if (attachments.application && attachments.application.fileID) {
+                html += `<td style="padding: 12px; border: 1px solid #ddd;">
+                    <a href="https://www.alio.go.kr/download/download.json?fileNo=${attachments.application.fileID}" target="_blank" style="color: #0066cc; text-decoration: none;">
+                        📝 ${attachments.application.name || '입사지원서.pdf'}
+                    </a>
+                </td>`;
+            } else {
+                html += '<td style="padding: 12px; border: 1px solid #ddd; text-align: center; color: #999;">파일 없음</td>';
+            }
+            html += '</tr>';
+            
+            // 직무기술서
+            html += '<tr><td style="padding: 12px; background: #f5f5f5; font-weight: 600; border: 1px solid #ddd;">직무기술서</td>';
+            if (attachments.job_description && attachments.job_description.fileID) {
+                html += `<td style="padding: 12px; border: 1px solid #ddd;">
+                    <a href="https://www.alio.go.kr/download/download.json?fileNo=${attachments.job_description.fileID}" target="_blank" style="color: #0066cc; text-decoration: none;">
+                        📄 ${attachments.job_description.name || '직무기술서.pdf'}
+                    </a>
+                </td>`;
+            } else {
+                html += '<td style="padding: 12px; border: 1px solid #ddd; text-align: center; color: #999;">파일 없음</td>';
+            }
+            html += '</tr>';
+            
+            // 기타 첨부파일
+            html += '<tr><td style="padding: 12px; background: #f5f5f5; font-weight: 600; border: 1px solid #ddd;">기타 첨부파일</td>';
+            if (attachments.others && attachments.others.length > 0) {
+                html += '<td style="padding: 12px; border: 1px solid #ddd;">';
+                attachments.others.forEach(file => {
+                    if (file.fileID) {
+                        html += `<div style="margin-bottom: 5px;">
+                            <a href="https://www.alio.go.kr/download/download.json?fileNo=${file.fileID}" target="_blank" style="color: #0066cc; text-decoration: none;">
+                                📎 ${file.name || '기타파일.pdf'}
+                            </a>
+                        </div>`;
+                    }
+                });
+                html += '</td>';
+            } else {
+                html += '<td style="padding: 12px; border: 1px solid #ddd; text-align: center; color: #999;">파일 없음</td>';
+            }
+            html += '</tr>';
+            
+            // 미접수사유
+            if (attachments.unavailable_reason) {
+                html += `<tr><td style="padding: 12px; background: #f5f5f5; font-weight: 600; border: 1px solid #ddd;">미접수사유</td>
+                    <td style="padding: 12px; border: 1px solid #ddd; color: #666;">${attachments.unavailable_reason}</td></tr>`;
+            }
+            
+            html += '</tbody></table>';
+            return html;
+        }
+
+        // 모달이 열릴 때 첨부파일 자동 로드
+        function showJobDetail(jobIdx) {
+            const job = allJobs.find(j => j.idx === jobIdx);
+            if (!job) return;
+            
+            const modal = document.getElementById('jobModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalBody = document.getElementById('modalBody');
+            
+            modalTitle.textContent = job.title;
+            
+            modalBody.innerHTML = `
+                <div class="modal-content-layout">
+                    <!-- 왼쪽: 기본 정보 -->
+                    <div class="modal-left-panel">
+                        <div class="modal-info-section">
+                            <h3>📋 기본정보</h3>
+                            <div class="modal-info-list">
+                                <div class="modal-info-row">
+                                    <span class="modal-info-label">공고번호:</span>
+                                    <span class="modal-info-value">${job.idx}</span>
+                                </div>
+                                <div class="modal-info-row">
+                                    <span class="modal-info-label">기관명:</span>
+                                    <span class="modal-info-value">${job.dept_name}</span>
+                                </div>
+                                <div class="modal-info-row">
+                                    <span class="modal-info-label">표준직무:</span>
+                                    <span class="modal-info-value">${job.ncs_category || 'NCS 대분류'}</span>
+                                </div>
+                                <div class="modal-info-row">
+                                    <span class="modal-info-label">학력정보:</span>
+                                    <span class="modal-info-value">${job.education || '학력무관'}</span>
+                                </div>
+                                <div class="modal-info-row">
+                                    <span class="modal-info-label">근무분야:</span>
+                                    <span class="modal-info-value">${job.work_field || '일반행정'}</span>
+                                </div>
+                                <div class="modal-info-row">
+                                    <span class="modal-info-label">채용구분:</span>
+                                    <span class="modal-info-value">${job.recruit_type}</span>
+                                </div>
+                                <div class="modal-info-row">
+                                    <span class="modal-info-label">고용형태:</span>
+                                    <span class="modal-info-value">${job.employment_type}</span>
+                                </div>
+                                <div class="modal-info-row">
+                                    <span class="modal-info-label">근무지:</span>
+                                    <span class="modal-info-value">${job.work_region}</span>
+                                </div>
+                                <div class="modal-info-row">
+                                    <span class="modal-info-label">급여정보:</span>
+                                    <span class="modal-info-value">${job.salary_info || '회사내규에 따름'}</span>
+                                </div>
+                                <div class="modal-info-row">
+                                    <span class="modal-info-label">채용인원:</span>
+                                    <span class="modal-info-value">${job.recruit_num}명</span>
+                                </div>
+                                <div class="modal-info-row">
+                                    <span class="modal-info-label">우대조건:</span>
+                                    <span class="modal-info-value">${job.preference || '해당사항 없음'}</span>
+                                </div>
+                                <div class="modal-info-row">
+                                    <span class="modal-info-label">채용기간:</span>
+                                    <span class="modal-info-value">${job.recruit_period}</span>
+                                </div>
+                                <div class="modal-info-row">
+                                    <span class="modal-info-label">등록일:</span>
+                                    <span class="modal-info-value">${formatDate(job.reg_date)}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 오른쪽: 상세 내용 -->
+                    <div class="modal-right-panel">
+                        <div class="modal-content-section">
+                            <h3>상세요강 전체보기</h3>
+                            <div class="modal-content-body">
+                                ${formatDetailContent(job)}
+                            </div>
+                        </div>
+                        
+                        <div class="modal-content-section">
+                            <h3>📊 전형단계별 채용정보</h3>
+                            <div class="modal-content-body">
+                                <table style="width: 100%; border-collapse: collapse; border: 1px solid #e5e7eb;">
+                                    <thead>
+                                        <tr style="background: #f8fafc;">
+                                            <th style="border: 1px solid #e5e7eb; padding: 12px; text-align: center; font-weight: 600;">구분</th>
+                                            <th style="border: 1px solid #e5e7eb; padding: 12px; text-align: center; font-weight: 600;">선발인원</th>
+                                            <th style="border: 1px solid #e5e7eb; padding: 12px; text-align: center; font-weight: 600;">응시인원</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td style="border: 1px solid #e5e7eb; padding: 12px; text-align: center; background: #f9fafb;">1차</td>
+                                            <td style="border: 1px solid #e5e7eb; padding: 12px; text-align: center;">-</td>
+                                            <td style="border: 1px solid #e5e7eb; padding: 12px; text-align: center;">-</td>
+                                        </tr>
+                                        <tr>
+                                            <td style="border: 1px solid #e5e7eb; padding: 12px; text-align: center; background: #f9fafb;">2차</td>
+                                            <td style="border: 1px solid #e5e7eb; padding: 12px; text-align: center;">-</td>
+                                            <td style="border: 1px solid #e5e7eb; padding: 12px; text-align: center;">-</td>
+                                        </tr>
+                                        <tr>
+                                            <td style="border: 1px solid #e5e7eb; padding: 12px; text-align: center; background: #f9fafb;">3차</td>
+                                            <td style="border: 1px solid #e5e7eb; padding: 12px; text-align: center;">-</td>
+                                            <td style="border: 1px solid #e5e7eb; padding: 12px; text-align: center;">-</td>
+                                        </tr>
+                                        <tr>
+                                            <td style="border: 1px solid #e5e7eb; padding: 12px; text-align: center; background: #f9fafb;">최종</td>
+                                            <td style="border: 1px solid #e5e7eb; padding: 12px; text-align: center;">-</td>
+                                            <td style="border: 1px solid #e5e7eb; padding: 12px; text-align: center;">-</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <div class="modal-content-section">
+                            <h3>첨부파일 전체보기</h3>
+                            <div class="modal-content-body">
+                                ${renderAttachments(job)}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="modal-actions">
+                    <button class="modal-btn modal-btn-primary" onclick="applyToJob('${job.idx}')">
+                        ✏️ 지원하기
+                    </button>
+                    <button class="modal-btn modal-btn-secondary" onclick="toggleBookmark('${job.idx}', this)">
+                        ⭐ 북마크 추가
+                    </button>
+                </div>
+            `;
+            
+            modal.style.display = 'block';
+            
+            // 첨부파일 자동 로드
+            if (!job.attachments) {
+                setTimeout(() => loadAttachments(job.idx), 500);
+            }
         }
 
         // 페이지 로드시 자동으로 데이터 불러오기

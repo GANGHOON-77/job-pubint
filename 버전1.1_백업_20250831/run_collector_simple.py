@@ -10,7 +10,7 @@ def main():
     SERVICE_KEY = "1bmDITdGFoaDTSrbT6Uyz8bFdlIL3nydHgRu0xQtXO8SiHlCrOJKv+JNSythF12BiijhVB3qE96/4Jxr70zUNg=="
     
     # Firebase 키 파일 경로
-    FIREBASE_KEY_PATH = "info-gov-firebase-adminsdk-9o52l-f6b59e8ae8.json"
+    FIREBASE_KEY_PATH = "job-pubint-firebase-adminsdk-fbsvc-1c4c2dbd08.json"
     
     print("=== 공공기관 채용정보 수집기 시작 ===")
     
@@ -19,9 +19,9 @@ def main():
     
     print(f"기존 데이터: {len(collector.existing_job_ids)}건 확인됨")
     
-    # 데이터 수집 및 저장 (3페이지만 테스트)
+    # 데이터 수집 및 저장 (10페이지까지 확인)
     try:
-        jobs = collector.collect_and_save(max_pages=3)
+        jobs = collector.collect_and_save(max_pages=10)
         print(f"\n=== 수집 완료! 총 {len(jobs)}건 처리됨 ===")
         
         if jobs:
