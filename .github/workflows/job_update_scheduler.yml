@@ -1,0 +1,93 @@
+name: 🚀 채용정보 자동 업데이트 스케줄러
+
+on:
+  schedule:
+    # 매 5분마다 신규 채용공고 확인
+    - cron: '*/5 * * * *'
+    # 매일 새벽 0시 (KST) 30일 경과 채용공고 정리 (UTC 15시 = KST 0시)
+    - cron: '0 15 * * *'
+  
+  # 수동 실행 옵션
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: '실행 모드 선택'
+        required: true
+        default: 'new_jobs'
+        type: choice
+        options:
+        - new_jobs
+        - cleanup
+        - both
+
+jobs:
+  update-jobs:
+    name: 채용정보 업데이트
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+    - name: 📥 코드 체크아웃
+      uses: actions/checkout@v4
+
+    - name: 🐍 Python 3.11 설정
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    - name: 📦 의존성 설치
+      run: |
+        python -m pip install --upgrade pip
+        pip install requests beautifulsoup4 firebase-admin pytz
+
+    - name: ⏰ 현재 시간 확인
+      id: time
+      run: |
+        echo "current_time=$(date)" >> $GITHUB_OUTPUT
+        echo "korea_time=$(TZ='Asia/Seoul' date)" >> $GITHUB_OUTPUT
+        echo "cron_minute=$(date +%M)" >> $GITHUB_OUTPUT
+
+    - name: 🔍 실행 모드 결정
+      id: mode
+      run: |
+        if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+          MODE="${{ github.event.inputs.mode }}"
+        elif [ "$(date +%H:%M)" = "15:00" ]; then
+          MODE="cleanup"
+        else
+          MODE="new_jobs"
+        fi
+        echo "mode=$MODE" >> $GITHUB_OUTPUT
+        echo "선택된 실행 모드: $MODE"
+
+    - name: 🆕 신규 채용공고 수집
+      if: steps.mode.outputs.mode == 'new_jobs' || steps.mode.outputs.mode == 'both'
+      env:
+        FIREBASE_CREDENTIALS: ${{ secrets.FIREBASE_CREDENTIALS }}
+        MOEF_API_KEY: ${{ secrets.MOEF_API_KEY }}
+        UPDATE_MODE: 'new_jobs'
+      run: |
+        echo "🔍 신규 채용공고 확인 시작..."
+        echo "현재 시각: ${{ steps.time.outputs.korea_time }}"
+        python auto_update_jobs.py
+
+    - name: 🗑️ 30일 경과 채용공고 정리
+      if: steps.mode.outputs.mode == 'cleanup' || steps.mode.outputs.mode == 'both'
+      env:
+        FIREBASE_CREDENTIALS: ${{ secrets.FIREBASE_CREDENTIALS }}
+        MOEF_API_KEY: ${{ secrets.MOEF_API_KEY }}
+        UPDATE_MODE: 'cleanup'
+      run: |
+        echo "🗑️ 30일 경과 채용공고 정리 시작..."
+        echo "현재 시각: ${{ steps.time.outputs.korea_time }}"
+        python auto_update_jobs.py
+
+    - name: 📊 결과 요약
+      if: always()
+      run: |
+        echo "========================================"
+        echo "🎯 채용정보 자동 업데이트 완료"
+        echo "📅 실행 일시: ${{ steps.time.outputs.korea_time }}"
+        echo "🔧 실행 모드: ${{ steps.mode.outputs.mode }}"
+        echo "🌐 트리거: ${{ github.event_name }}"
+        echo "========================================"
