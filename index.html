@@ -1580,17 +1580,8 @@
 
         // 지원하기 - 잡알리오 실제 게시글로 이동
         function applyToJob(jobIdx) {
-            const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-            
-            let alio_url;
-            if (isMobile) {
-                // 모바일: /mobile/ 경로와 필수 파라미터 사용
-                alio_url = `https://job.alio.go.kr/mobile/recruitview.do?pageNo=1&idx=${jobIdx}&location=&detail_code=&title=`;
-            } else {
-                // PC: 기존 단순 URL
-                alio_url = `https://job.alio.go.kr/recruitview.do?idx=${jobIdx}`;
-            }
-            
+            // 실제 사이트와 동일한 전체 파라미터 구조 사용 (PC/모바일 공통)
+            const alio_url = `https://job.alio.go.kr/recruitview.do?pageNo=1&idx=${jobIdx}&s_date=2025.07.06&e_date=2025.09.06&org_type=&org_name=&search_type=&keyword=&order=REG_DATE&sort=DESC&pageSet=10`;
             window.open(alio_url, '_blank');
         }
 
