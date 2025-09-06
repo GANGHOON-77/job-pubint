@@ -70,10 +70,11 @@
     }
     </script>
     
-    <!-- Firebase SDK v9 (모듈화) -->
-    <script type="module">
-        import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js';
-        import { getFirestore, collection, getDocs, query, orderBy, where } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
+    <!-- Firebase SDK v8 (호환성 향상) -->
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
+    
+    <script>
         
         // Firebase 설정
         const firebaseConfig = {
@@ -86,8 +87,8 @@
         };
         
         // Firebase 초기화
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
         
         // 전역 Firebase 함수들을 window 객체에 노출
         window.loadJobsFromFirebase = async function() {
@@ -97,12 +98,9 @@
                 // 30일 필터링 (8월 6일 이후)
                 const cutoffDate = new Date('2025-08-06');
                 
-                const q = query(
-                    collection(db, 'jobs'),
-                    orderBy('reg_date', 'desc')
-                );
-                
-                const querySnapshot = await getDocs(q);
+                const querySnapshot = await db.collection('recruitment_jobs')
+                    .orderBy('reg_date', 'desc')
+                    .get();
                 const jobs = [];
                 
                 querySnapshot.forEach((doc) => {
