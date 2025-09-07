@@ -70,11 +70,11 @@
     }
     </script>
     
-    <!-- Firebase SDK 호환 버전 (NewJobPortal 방식) -->
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
-    
-    <script>
+    <!-- Firebase SDK v9 (모듈화) -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js';
+        import { getFirestore, collection, getDocs, query, orderBy, where } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
+        
         // Firebase 설정
         const firebaseConfig = {
             apiKey: "AIzaSyBxRXKdGcwI5KdUhvZrQnCQLkKdVjDyZmc",
@@ -85,56 +85,118 @@
             appId: "1:475765568826:web:d4f6c5e8a9b2c3d4e5f6g7"
         };
         
-        // Firebase 초기화 (호환 방식)
-        let app;
-        if (!firebase.apps || firebase.apps.length === 0) {
-            app = firebase.initializeApp(firebaseConfig);
-            console.log('✅ Firebase 앱 초기화 완료');
-        } else {
-            app = firebase.app();
-            console.log('✅ 기존 Firebase 앱 사용');
-        }
+        // Firebase 초기화
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
         
-        const db = firebase.firestore();
-        
-        // Firebase에서 채용공고 데이터 가져오기 (portal_v1.5.html과 동일한 함수명)
+        // 전역 Firebase 함수들을 window 객체에 노출
         window.loadJobsFromFirebase = async function() {
             try {
-                console.log('🔥 Firebase에서 직접 데이터 로딩 중...');
+                console.log('Firebase에서 데이터 로딩 시작...');
                 
-                // jobs 컬렉션에서 데이터 가져오기 (호환 방식)
-                const jobsSnapshot = await db.collection('jobs')
-                    .orderBy('reg_date', 'desc')
-                    .limit(1000)
-                    .get();
+                // 30일 필터링 (8월 6일 이후)
+                const cutoffDate = new Date('2025-08-06');
                 
+                const q = query(
+                    collection(db, 'recruitment_jobs'),
+                    orderBy('reg_date', 'desc')
+                );
+                
+                const querySnapshot = await getDocs(q);
                 const jobs = [];
-                jobsSnapshot.forEach(doc => {
+                
+                let excludedCount = 0;
+                let invalidDateCount = 0;
+                let includedCount = 0;
+                
+                querySnapshot.forEach((doc) => {
                     const data = doc.data();
-                    jobs.push({
-                        idx: doc.id,
-                        title: data.title || '제목 없음',
-                        dept_name: data.dept_name || '기관명 없음',
-                        work_region: data.work_region || '지역 정보 없음',
-                        grade: data.grade || '급수 정보 없음',
-                        reg_date: data.reg_date || '',
-                        end_date: data.end_date || '',
-                        read_count: data.read_count || 0,
-                        etc_info: data.etc_info || 'N||N',
-                        contents: data.contents || '',
-                        files: data.files || []
-                    });
+                    const regDateValue = data.reg_date || data.regDate;
+                    const regDate = new Date(regDateValue);
+                    
+                    // 날짜 유효성 체크
+                    if (!regDateValue || isNaN(regDate.getTime())) {
+                        invalidDateCount++;
+                        console.log(`⚠️ 유효하지 않은 날짜: ${regDateValue}, doc.id: ${doc.id}`);
+                        return; // 날짜가 없으면 건너뛰기
+                    }
+                    
+                    // 8월 6일 이후 데이터만 포함
+                    if (regDate >= cutoffDate) {
+                        includedCount++;
+                        // Firebase 실제 필드명으로 매핑 (콘솔 확인 결과 적용)
+                        jobs.push({
+                            id: doc.id,
+                            idx: data.idx || doc.id,
+                            title: data.title || '제목 없음',
+                            dept_name: data.dept_name || '기관명 없음',
+                            work_region: data.work_region || '지역 정보 없음',
+                            employment_type: data.employment_type || '고용형태 정보 없음',
+                            reg_date: data.reg_date,
+                            end_date: data.end_date,
+                            recruit_num: data.recruit_num || '1',
+                            recruit_type: data.recruit_type || '채용구분 정보 없음',
+                            ncs_category: data.ncs_category || 'NCS 대분류',
+                            education: data.education || '학력무관',
+                            work_field: data.work_field || '일반행정',
+                            salary_info: data.salary_info || '회사내규에 따름',
+                            preference: data.preference || '해당사항 없음',
+                            recruit_period: data.recruit_period || '채용기간 정보 없음',
+                            detail_content: data.detail_content || '상세 내용이 제공되지 않았습니다.',
+                            // 추가 실제 필드들
+                            disqualification: data.disqualification,
+                            ncs_name: data.ncs_name,
+                            job_type: data.job_type,
+                            location: data.location,
+                            status: data.status,
+                            company: data.company,
+                            url: data.url,
+                            updated_at: data.updated_at,
+                            procedure: data.procedure,
+                            qualification: data.qualification,
+                            created_at: data.created_at,
+                            ncs_code: data.ncs_code,
+                            ...data // 나머지 필드들도 포함
+                        });
+                    } else {
+                        excludedCount++;
+                        console.log(`❌ 제외된 데이터 (8/6 이전): ${regDateValue}, 제목: ${data.title}`);
+                    }
                 });
                 
-                console.log('✅ Firebase에서 가져온 데이터:', jobs.length, '건');
+                console.log(`📊 Firebase 데이터 로드 통계:`);
+                console.log(`  - 전체 문서 수: ${querySnapshot.size}건`);
+                console.log(`  - 포함된 건수 (8/6 이후): ${includedCount}건`);
+                console.log(`  - 제외된 건수 (8/6 이전): ${excludedCount}건`);
+                console.log(`  - 유효하지 않은 날짜: ${invalidDateCount}건`);
+                console.log(`  - 최종 로드된 채용공고: ${jobs.length}건`);
+                
+                // 첫 번째 데이터 샘플 로그 출력 (디버깅용)
+                if (jobs.length > 0) {
+                    console.log('📄 첫 번째 채용공고 데이터 샘플:', jobs[0]);
+                    console.log('📝 제목:', jobs[0].title);
+                    console.log('🏢 기관명:', jobs[0].dept_name);
+                    console.log('📍 근무지:', jobs[0].work_region);
+                    console.log('💼 고용형태:', jobs[0].employment_type);
+                    console.log('🎯 채용구분:', jobs[0].recruit_type);
+                    
+                    // 원본 Firebase 데이터도 출력
+                    console.log('🔍 원본 Firebase 데이터 키들:', Object.keys(jobs[0]));
+                    
+                    // 원본 데이터에서 각 키의 값도 출력
+                    const originalData = querySnapshot.docs[0].data();
+                    console.log('🗂️ 원본 Firebase 데이터 전체:', originalData);
+                    console.log('📋 원본 키-값 쌍:');
+                    Object.keys(originalData).forEach(key => {
+                        console.log(`  ${key}: ${originalData[key]}`);
+                    });
+                }
+                
                 return jobs;
                 
             } catch (error) {
-                console.error('❌ Firebase 데이터 가져오기 실패:', error);
-                
-                // Firebase 연결 실패시 샘플 데이터 반환
-                console.log('🔄 샘플 데이터로 대체');
-                return getSampleJobs();
+                console.error('Firebase 데이터 로드 실패:', error);
+                throw error;
             }
         };
         
@@ -1234,7 +1296,7 @@
         const itemsPerPage = 12;
         let currentFilter = 'total'; // 현재 적용된 필터
 
-        // FastAPI 서버에서 채용정보 불러오기 (로컬과 동일)
+        // Firebase에서 직접 채용정보 불러오기 (모바일 호환성)
         async function loadJobs() {
             const loadBtn = document.getElementById('loadBtn');
             const jobsGrid = document.getElementById('jobsGrid');
@@ -1246,47 +1308,31 @@
             jobsGrid.innerHTML = '<div class="loading"><div class="spinner"></div>채용공고를 불러오는 중입니다...</div>';
             
             try {
-                console.log('🔥 Firebase에서 직접 데이터 로딩 중...');
+                console.log('🔄 Firebase에서 데이터 로드 시작...');
                 
-                // Firebase에서 직접 데이터 가져오기 (portal_v1.5.html 방식)
-                const jobs = await loadJobsFromFirebase();
+                // Firebase에서 직접 채용공고 데이터 가져오기
+                allJobs = await loadJobsFromFirebase();
+                console.log(`📊 Firebase에서 총 ${allJobs.length}건 로드됨`);
                 
-                if (jobs && jobs.length > 0) {
-                    allJobs = jobs;
-                    filteredJobs = [...allJobs];
-                    
-                    console.log(`✅ ${allJobs.length}건의 채용공고 로드 완료`);
-                    console.log('Firebase에서 가져온 첫 번째 데이터:', allJobs[0]);
-                    
-                    // 통계 업데이트
-                    updateStats();
-                    statsGrid.style.display = 'flex';
-                    
-                    // 채용공고 표시
-                    displayJobs();
-                    
-                    loadBtn.textContent = '✅ 로드 완료!';
-                    setTimeout(() => {
-                        loadBtn.textContent = '📥 채용정보 불러오기';
-                    }, 2000);
-                    
-                } else {
-                    console.warn('Firebase에서 데이터를 가져올 수 없습니다');
-                    throw new Error('데이터 없음');
-                }
-                
-            } catch (error) {
-                console.error('❌ Firebase 데이터 로드 실패:', error);
-                
-                // 오류시 샘플 데이터로 대체 (NewJobPortal 방식)
-                console.log('🔄 샘플 데이터로 대체합니다');
-                const sampleJobs = getSampleJobs();
-                allJobs = sampleJobs;
+                // 데이터를 filteredJobs에 복사
                 filteredJobs = [...allJobs];
                 
+                console.log(`✅ 표시할 공고: ${filteredJobs.length}건`);
+                
+                // 통계 업데이트
                 updateStats();
                 statsGrid.style.display = 'flex';
+                
+                // 채용공고 표시
                 displayJobs();
+                
+            } catch (error) {
+                console.error('Firebase 데이터 로드 실패:', error);
+                
+                // 오류시 빈 상태 표시
+                allJobs = [];
+                filteredJobs = [];
+                jobsGrid.innerHTML = '<div class="empty-state"><h3>😔 데이터 로드 실패</h3><p>Firebase 연결을 확인해주세요.</p></div>';
                 
             } finally {
                 loadBtn.disabled = false;
@@ -1294,81 +1340,60 @@
             }
         }
 
-        // 통계 데이터 로드 (Firebase 직접 연결만 사용)
+        // 통계 데이터 로드 (Firebase 직접 사용)
         async function loadStats() {
-            // 클라이언트에서 직접 계산
-            updateStats();
+            try {
+                if (allJobs && allJobs.length > 0) {
+                    const stats = await loadStatsFromFirebase(allJobs);
+                    document.getElementById('totalCount').textContent = stats.total_count;
+                    document.getElementById('urgentCount').textContent = stats.urgent_count;
+                    document.getElementById('newCount').textContent = stats.new_count;
+                    document.getElementById('orgCount').textContent = stats.org_count;
+                } else {
+                    // 데이터가 없으면 클라이언트에서 계산
+                    updateStats();
+                }
+            } catch (error) {
+                console.error('통계 로드 실패:', error);
+                updateStats();
+            }
         }
 
-        // 샘플 채용공고 데이터 (Firebase 연결 실패시 대체 - NewJobPortal 방식)
-        function getSampleJobs() {
-            return [
-                {
-                    idx: 'sample1',
-                    title: '2025년 서울특별시 9급 공무원 채용',
-                    dept_name: '서울특별시',
-                    work_region: '서울시 전체',
-                    grade: '9급',
-                    reg_date: '20250101',
-                    end_date: '20250131',
-                    read_count: 1520,
-                    etc_info: 'Y||N',
-                    contents: '서울특별시에서 9급 공무원을 공개채용합니다.',
-                    files: []
-                },
-                {
-                    idx: 'sample2',
-                    title: '국민연금공단 계약직 직원 채용',
-                    dept_name: '국민연금공단',
-                    work_region: '전국',
-                    grade: '7급 상당',
-                    reg_date: '20250105',
-                    end_date: '20250125',
-                    read_count: 890,
-                    etc_info: 'N||Y',
-                    contents: '국민연금공단에서 계약직 직원을 모집합니다.',
-                    files: []
-                },
-                {
-                    idx: 'sample3',
-                    title: '인천광역시 교육청 교육전문직원 채용',
-                    dept_name: '인천광역시교육청',
-                    work_region: '인천시',
-                    grade: '6급',
-                    reg_date: '20250110',
-                    end_date: '20250130',
-                    read_count: 445,
-                    etc_info: 'N||N',
-                    contents: '교육전문직원을 채용합니다.',
-                    files: []
-                },
-                {
-                    idx: 'sample4',
-                    title: '한국수력원자력(주) 신입직원 채용',
-                    dept_name: '한국수력원자력',
-                    work_region: '경주, 울진',
-                    grade: '대졸신입',
-                    reg_date: '20250115',
-                    end_date: '20250215',
-                    read_count: 2340,
-                    etc_info: 'Y||Y',
-                    contents: '한국수력원자력에서 신입직원을 모집합니다.',
-                    files: []
-                },
-                {
-                    idx: 'sample5',
-                    title: '부산광역시 중구청 임기제공무원 채용',
-                    dept_name: '부산광역시 중구청',
-                    work_region: '부산시',
-                    grade: '8급',
-                    reg_date: '20250120',
-                    end_date: '20250220',
-                    read_count: 670,
-                    etc_info: 'N||N',
-                    contents: '임기제공무원을 모집합니다.',
-                    files: []
-                }
-            ];
+        // 샘플 데이터 생성
+        function generateSampleData() {
+            const companies = ['한국전력공사', '한국수자원공사', '한국도로공사', '한국철도공사', '한국토지주택공사', '한국가스공사'];
+            const titles = ['IT개발직 신입사원', '경영관리직 경력사원', '기술직 채용', '행정직 공개채용', '연구개발직 모집'];
+            const locations = ['서울', '부산', '대구', '인천', '광주', '대전', '울산', '세종'];
+            const types = ['정규직', '계약직', '무기계약직'];
+            
+            const jobs = [];
+            for (let i = 1; i <= 50; i++) {
+                const regDate = new Date();
+                regDate.setDate(regDate.getDate() - Math.floor(Math.random() * 40));
+                
+                const endDate = new Date(regDate);
+                endDate.setDate(endDate.getDate() + Math.floor(Math.random() * 30) + 10);
+                
+                jobs.push({
+                    idx: `2024-${String(i).padStart(4, '0')}`,
+                    title: titles[Math.floor(Math.random() * titles.length)],
+                    dept_name: companies[Math.floor(Math.random() * companies.length)],
+                    work_region: locations[Math.floor(Math.random() * locations.length)],
+                    employment_type: types[Math.floor(Math.random() * types.length)],
+                    reg_date: regDate.toISOString().split('T')[0],
+                    end_date: endDate.toISOString().split('T')[0],
+                    recruit_num: Math.floor(Math.random() * 10) + 1,
+                    recruit_type: Math.random() > 0.5 ? '신입' : '경력',
+                    ncs_category: 'IT/정보통신',
+                    education: '대졸(4년)',
+                    work_field: '소프트웨어 개발',
+                    salary_info: '회사내규에 따름',
+                    preference: '관련 자격증 보유자 우대',
+                    recruit_period: `${regDate.toISOString().split('T')[0]} ~ ${endDate.toISOString().split('T')[0]}`,
+                    detail_content: '본 채용공고는 공공기관 채용정보 시스템을 통해 제공되는 샘플 데이터입니다.'
+                });
+            }
+            return jobs;
         }
 
         // 통계 업데이트
@@ -1498,7 +1523,7 @@
             `;
         }
 
-        // 첨부파일 렌더링 함수 (동적 로딩 지원)
+        // 첨부파일 렌더링 함수 (원본과 동일)
         function renderAttachments(job) {
             const attachments = job.attachments;
             
@@ -1611,7 +1636,7 @@
                                 </div>
                                 <div class="modal-info-row">
                                     <span class="modal-info-label">기관명:</span>
-                                    <span class="modal-info-value">${job.dept_name}</span>
+                                    <span class="modal-info-value">${job.dept_name || '기관명 없음'}</span>
                                 </div>
                                 <div class="modal-info-row">
                                     <span class="modal-info-label">표준직무:</span>
@@ -1627,15 +1652,15 @@
                                 </div>
                                 <div class="modal-info-row">
                                     <span class="modal-info-label">채용구분:</span>
-                                    <span class="modal-info-value">${job.recruit_type}</span>
+                                    <span class="modal-info-value">${job.recruit_type || '채용구분 정보 없음'}</span>
                                 </div>
                                 <div class="modal-info-row">
                                     <span class="modal-info-label">고용형태:</span>
-                                    <span class="modal-info-value">${job.employment_type}</span>
+                                    <span class="modal-info-value">${job.employment_type || '고용형태 정보 없음'}</span>
                                 </div>
                                 <div class="modal-info-row">
                                     <span class="modal-info-label">근무지:</span>
-                                    <span class="modal-info-value">${job.work_region}</span>
+                                    <span class="modal-info-value">${job.work_region || '지역 정보 없음'}</span>
                                 </div>
                                 <div class="modal-info-row">
                                     <span class="modal-info-label">급여정보:</span>
@@ -1643,7 +1668,7 @@
                                 </div>
                                 <div class="modal-info-row">
                                     <span class="modal-info-label">채용인원:</span>
-                                    <span class="modal-info-value">${job.recruit_num}명</span>
+                                    <span class="modal-info-value">${job.recruit_num || '1'}명</span>
                                 </div>
                                 <div class="modal-info-row">
                                     <span class="modal-info-label">우대조건:</span>
@@ -1651,7 +1676,7 @@
                                 </div>
                                 <div class="modal-info-row">
                                     <span class="modal-info-label">채용기간:</span>
-                                    <span class="modal-info-value">${job.recruit_period}</span>
+                                    <span class="modal-info-value">${job.recruit_period || '채용기간 정보 없음'}</span>
                                 </div>
                                 <div class="modal-info-row">
                                     <span class="modal-info-label">등록일:</span>
@@ -1667,6 +1692,8 @@
                             <h3>상세요강 전체보기</h3>
                             <div class="modal-content-body">
                                 ${formatDetailContent(job)}
+                                ${job.qualification ? `<hr style="margin: 20px 0;"><h4 style="margin-bottom: 15px;">📋 자격요건</h4><div style="background: #f8fafc; padding: 15px; border-radius: 8px; line-height: 1.6;">${job.qualification}</div>` : ''}
+                                ${job.procedure ? `<hr style="margin: 20px 0;"><h4 style="margin-bottom: 15px;">📝 전형절차</h4><div style="background: #f8fafc; padding: 15px; border-radius: 8px; line-height: 1.6;">${job.procedure}</div>` : ''}
                             </div>
                         </div>
                         
@@ -1858,61 +1885,6 @@
             
             return `<div style="line-height: 1.6; font-size: 14px; padding: 10px; white-space: pre-wrap;">${formattedContent}</div>`;
         }
-        
-        function formatJobQualification(content) {
-            if (!content) {
-                return '<p style="color: #666;">자격요건 정보가 제공되지 않았습니다.</p>';
-            }
-            
-            let formattedContent = content
-                .replace(/\r\n/g, '<br>')
-                .replace(/\n/g, '<br>')
-                .replace(/(<br\s*\/?>){2,}/g, '<br><br>')
-                .replace(/^<br>/, '');
-            
-            // 심플한 포맷팅
-            formattedContent = formattedContent
-                .replace(/(\d+\.\s*[^<]+?)(<br>|$)/g, '<p style="font-weight: 600; margin: 10px 0 5px 0;">$1</p>')
-                .replace(/([ㆍ·•-]\s*.+?)(<br>|$)/g, '<p style="margin: 5px 0; padding-left: 15px;">$1</p>')
-                .replace(/(필수요건|자격요건|담당업무)/g, '<strong>$1</strong>');
-            
-            return formattedContent;
-        }
-
-        // 첨부파일 링크 생성
-        function generateAttachmentLinks(job) {
-            // 실제 첨부파일 정보가 있는 경우
-            if (job.attachments && job.attachments.length > 0) {
-                return job.attachments.map(file => 
-                    `<div style="margin: 5px 0; padding: 8px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 4px;">
-                        <a href="${file.url}" target="_blank" style="text-decoration: none; color: #3b82f6;">
-                            📎 ${file.name} ${file.size ? '(' + file.size + ')' : ''}
-                        </a>
-                    </div>`
-                ).join('');
-            }
-            
-            // 첨부파일 정보가 없는 경우 원본 사이트 링크
-            return `<div style="padding: 15px; text-align: center; color: #6b7280; background: #f9fafb; border-radius: 4px;">
-                        📎 첨부파일은 원본 사이트에서 확인하세요
-                    </div>`;
-        }
-
-        // 파일 확장자별 아이콘 반환
-        function getFileIcon(filename) {
-            if (!filename) return '📄';
-            const ext = filename.toLowerCase().split('.').pop();
-            const icons = {
-                'pdf': '📕',
-                'doc': '📘', 'docx': '📘',
-                'hwp': '📗',
-                'xls': '📊', 'xlsx': '📊',
-                'ppt': '📙', 'pptx': '📙',
-                'zip': '🗜️', 'rar': '🗜️',
-                'jpg': '🖼️', 'jpeg': '🖼️', 'png': '🖼️', 'gif': '🖼️'
-            };
-            return icons[ext] || '📄';
-        }
 
         // 검색 이벤트
         document.getElementById('searchInput').addEventListener('input', function() {
@@ -2004,136 +1976,6 @@
             // 현재는 모든 데이터가 공공기관이므로 필터링 없이 반환
             // 추후 기관 유형별 데이터가 구분되면 여기서 필터링
             return jobs;
-        }
-
-        // 첨부파일 동적 로딩 함수
-        async function loadAttachments(jobIdx) {
-            const attachmentDiv = document.getElementById(`attachments-${jobIdx}`);
-            if (!attachmentDiv) return;
-            
-            try {
-                attachmentDiv.innerHTML = `
-                    <div style="text-align: center; padding: 20px;">
-                        <div style="margin-bottom: 15px; color: #667eea;">
-                            🔍 첨부파일 정보를 수집하는 중...
-                        </div>
-                        <div style="width: 30px; height: 30px; border: 3px solid #f3f3f3; border-top: 3px solid #667eea; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto;"></div>
-                    </div>
-                `;
-                
-                // Firebase/allJobs에서 첨부파일 정보 가져오기
-                const job = allJobs.find(j => j.idx === jobIdx);
-                
-                if (job && job.attachments) {
-                    // 첨부파일 정보가 있으면 테이블 렌더링
-                    const attachmentTable = renderAttachmentTable(job.attachments);
-                    attachmentDiv.innerHTML = attachmentTable;
-                    }
-                    
-                    console.log(`✅ 첨부파일 로드 완료: ${jobIdx} (${result.source})`);
-                } else {
-                    // 첨부파일 정보가 없음
-                    attachmentDiv.innerHTML = `
-                        <table style="width: 100%; border-collapse: collapse; border: 1px solid #ddd;">
-                            <tbody>
-                                <tr>
-                                    <td style="padding: 12px; background: #f5f5f5; font-weight: 600; border: 1px solid #ddd; text-align: center;">
-                                        📎 첨부파일 정보 없음
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td style="padding: 12px; border: 1px solid #ddd; text-align: center; color: #666;">
-                                        ${result.message || '첨부파일이 없거나 수집할 수 없습니다.'}
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    `;
-                }
-                
-            } catch (error) {
-                console.error(`첨부파일 로드 실패 (${jobIdx}):`, error);
-                attachmentDiv.innerHTML = `
-                    <div style="text-align: center; padding: 20px; color: #e74c3c;">
-                        ❌ 첨부파일 정보 로드 실패<br>
-                        <button onclick="loadAttachments('${jobIdx}')" style="margin-top: 10px; padding: 8px 16px; background: #667eea; color: white; border: none; border-radius: 6px; cursor: pointer;">
-                            🔄 다시 시도
-                        </button>
-                    </div>
-                `;
-            }
-        }
-        
-        // 첨부파일 테이블 렌더링 (기존 코드 재사용)
-        function renderAttachmentTable(attachments) {
-            let html = '<table style="width: 100%; border-collapse: collapse; border: 1px solid #ddd;"><tbody>';
-            
-            // 공고문
-            html += '<tr><td style="padding: 12px; background: #f5f5f5; font-weight: 600; border: 1px solid #ddd; width: 120px;">공고문</td>';
-            if (attachments.announcement && attachments.announcement.fileID) {
-                html += `<td style="padding: 12px; border: 1px solid #ddd;">
-                    <a href="https://www.alio.go.kr/download/download.json?fileNo=${attachments.announcement.fileID}" target="_blank" style="color: #0066cc; text-decoration: none;">
-                        📋 ${attachments.announcement.name || '공고문.pdf'}
-                    </a>
-                </td>`;
-            } else {
-                html += '<td style="padding: 12px; border: 1px solid #ddd; text-align: center; color: #999;">파일 없음</td>';
-            }
-            html += '</tr>';
-            
-            // 입사지원서
-            html += '<tr><td style="padding: 12px; background: #f5f5f5; font-weight: 600; border: 1px solid #ddd;">입사지원서</td>';
-            if (attachments.application && attachments.application.fileID) {
-                html += `<td style="padding: 12px; border: 1px solid #ddd;">
-                    <a href="https://www.alio.go.kr/download/download.json?fileNo=${attachments.application.fileID}" target="_blank" style="color: #0066cc; text-decoration: none;">
-                        📝 ${attachments.application.name || '입사지원서.pdf'}
-                    </a>
-                </td>`;
-            } else {
-                html += '<td style="padding: 12px; border: 1px solid #ddd; text-align: center; color: #999;">파일 없음</td>';
-            }
-            html += '</tr>';
-            
-            // 직무기술서
-            html += '<tr><td style="padding: 12px; background: #f5f5f5; font-weight: 600; border: 1px solid #ddd;">직무기술서</td>';
-            if (attachments.job_description && attachments.job_description.fileID) {
-                html += `<td style="padding: 12px; border: 1px solid #ddd;">
-                    <a href="https://www.alio.go.kr/download/download.json?fileNo=${attachments.job_description.fileID}" target="_blank" style="color: #0066cc; text-decoration: none;">
-                        📄 ${attachments.job_description.name || '직무기술서.pdf'}
-                    </a>
-                </td>`;
-            } else {
-                html += '<td style="padding: 12px; border: 1px solid #ddd; text-align: center; color: #999;">파일 없음</td>';
-            }
-            html += '</tr>';
-            
-            // 기타 첨부파일
-            html += '<tr><td style="padding: 12px; background: #f5f5f5; font-weight: 600; border: 1px solid #ddd;">기타 첨부파일</td>';
-            if (attachments.others && attachments.others.length > 0) {
-                html += '<td style="padding: 12px; border: 1px solid #ddd;">';
-                attachments.others.forEach(file => {
-                    if (file.fileID) {
-                        html += `<div style="margin-bottom: 5px;">
-                            <a href="https://www.alio.go.kr/download/download.json?fileNo=${file.fileID}" target="_blank" style="color: #0066cc; text-decoration: none;">
-                                📎 ${file.name || '기타파일.pdf'}
-                            </a>
-                        </div>`;
-                    }
-                });
-                html += '</td>';
-            } else {
-                html += '<td style="padding: 12px; border: 1px solid #ddd; text-align: center; color: #999;">파일 없음</td>';
-            }
-            html += '</tr>';
-            
-            // 미접수사유
-            if (attachments.unavailable_reason) {
-                html += `<tr><td style="padding: 12px; background: #f5f5f5; font-weight: 600; border: 1px solid #ddd;">미접수사유</td>
-                    <td style="padding: 12px; border: 1px solid #ddd; color: #666;">${attachments.unavailable_reason}</td></tr>`;
-            }
-            
-            html += '</tbody></table>';
-            return html;
         }
 
         // 페이지 로드시 자동으로 데이터 불러오기
