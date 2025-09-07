@@ -1235,16 +1235,11 @@
             jobsGrid.innerHTML = '<div class="loading"><div class="spinner"></div>채용공고를 불러오는 중입니다...</div>';
             
             try {
-                console.log('🔄 API 서버에서 데이터 로드 시작...');
+                console.log('🔄 Firebase에서 데이터 로드 시작...');
                 
-                // FastAPI 서버에서 채용공고 데이터 가져오기
-                const jobsResponse = await fetch('http://localhost:8003/api/jobs?limit=300');
-                if (!jobsResponse.ok) {
-                    throw new Error(`HTTP error! status: ${jobsResponse.status}`);
-                }
-                
-                allJobs = await jobsResponse.json();
-                console.log(`📊 API에서 총 ${allJobs.length}건 로드됨`);
+                // Firebase에서 직접 데이터 가져오기
+                await loadJobsFromFirebase();
+                return;
                 
                 // 데이터를 filteredJobs에 복사
                 filteredJobs = [...allJobs];
@@ -1979,19 +1974,13 @@
                     </div>
                 `;
                 
-                // API에서 첨부파일 정보 가져오기
-                const response = await fetch(`http://localhost:8003/api/jobs/${jobIdx}/attachments`);
-                const result = await response.json();
+                // Firebase/allJobs에서 첨부파일 정보 가져오기
+                const job = allJobs.find(j => j.idx === jobIdx);
                 
-                if (result.success && result.attachments) {
+                if (job && job.attachments) {
                     // 첨부파일 정보가 있으면 테이블 렌더링
-                    const attachmentTable = renderAttachmentTable(result.attachments);
+                    const attachmentTable = renderAttachmentTable(job.attachments);
                     attachmentDiv.innerHTML = attachmentTable;
-                    
-                    // 전역 job 데이터도 업데이트
-                    const job = allJobs.find(j => j.idx === jobIdx);
-                    if (job) {
-                        job.attachments = result.attachments;
                     }
                     
                     console.log(`✅ 첨부파일 로드 완료: ${jobIdx} (${result.source})`);
