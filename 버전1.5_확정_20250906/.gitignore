@@ -1,0 +1,35 @@
+# Firebase 인증 파일
+*.json
+파이어베이스 인증/
+firebase-key-*.txt
+job-pubint-firebase-*.json
+
+# 서버 파일
+server_*.py
+*_collector*.py
+data_collector*.py
+auto_update_jobs.py
+
+# Python 캐시
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# 로그 및 임시 파일
+*.log
+*.tmp
+debug_*.py
+test_*.py
+
+# 데이터 파일
+recruitment_jobs_*.json
+jobs_data_*.json
+
+# 기타 개발 파일
+run_*.py
+update_*.py
+check_*.py
+simple_*.py
+start_*.py
+attachment_*.py
