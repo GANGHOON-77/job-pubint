@@ -1238,10 +1238,10 @@
                 console.log('🔄 Firebase에서 데이터 로드 시작...');
                 
                 // Firebase에서 직접 데이터 가져오기
-                await loadJobsFromFirebase();
-                return;
+                const firebaseJobs = await loadJobsFromFirebase();
                 
-                // 데이터를 filteredJobs에 복사
+                // 데이터를 allJobs와 filteredJobs에 저장
+                allJobs = firebaseJobs;
                 filteredJobs = [...allJobs];
                 
                 console.log(`✅ 표시할 공고: ${filteredJobs.length}건`);
@@ -1267,24 +1267,10 @@
             }
         }
 
-        // 통계 데이터 로드
+        // 통계 데이터 로드 (Firebase 직접 연결만 사용)
         async function loadStats() {
-            try {
-                const statsResponse = await fetch('/api/stats');
-                if (statsResponse.ok) {
-                    const stats = await statsResponse.json();
-                    document.getElementById('totalCount').textContent = stats.total_count;
-                    document.getElementById('urgentCount').textContent = stats.urgent_count;
-                    document.getElementById('newCount').textContent = stats.new_count;
-                    document.getElementById('orgCount').textContent = stats.org_count;
-                } else {
-                    // 통계 로드 실패시 클라이언트에서 계산
-                    updateStats();
-                }
-            } catch (error) {
-                console.error('통계 로드 실패:', error);
-                updateStats();
-            }
+            // 클라이언트에서 직접 계산
+            updateStats();
         }
 
         // 샘플 데이터 생성
