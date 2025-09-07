@@ -23,7 +23,7 @@
     <!-- 추가 SEO 메타태그 -->
     <meta name="theme-color" content="#1565c0">
     <meta name="msapplication-TileColor" content="#1565c0">
-    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="format-detection" content="telephone=no">
     
@@ -70,11 +70,10 @@
     }
     </script>
     
-    <!-- Firebase SDK v8 (호환성 향상) -->
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
-    
-    <script>
+    <!-- Firebase SDK v9 (모듈화) -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js';
+        import { getFirestore, collection, getDocs, query, orderBy, where } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
         
         // Firebase 설정
         const firebaseConfig = {
@@ -86,18 +85,9 @@
             appId: "1:475765568826:web:d4f6c5e8a9b2c3d4e5f6g7"
         };
         
-        // Firebase 초기화 (이미 초기화되었는지 확인)
-        let app;
-        if (!firebase.apps || firebase.apps.length === 0) {
-            app = firebase.initializeApp(firebaseConfig);
-            console.log('✅ Firebase 앱 초기화 완료');
-        } else {
-            app = firebase.app();
-            console.log('✅ 기존 Firebase 앱 사용');
-        }
-        
-        const db = firebase.firestore();
-        console.log('✅ Firestore 연결 완료');
+        // Firebase 초기화
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
         
         // 전역 Firebase 함수들을 window 객체에 노출
         window.loadJobsFromFirebase = async function() {
@@ -107,10 +97,12 @@
                 // 30일 필터링 (8월 6일 이후)
                 const cutoffDate = new Date('2025-08-06');
                 
-                const querySnapshot = await db.collection('jobs')
-                    .orderBy('reg_date', 'desc')
-                    .limit(1000)
-                    .get();
+                const q = query(
+                    collection(db, 'jobs'),
+                    orderBy('reg_date', 'desc')
+                );
+                
+                const querySnapshot = await getDocs(q);
                 const jobs = [];
                 
                 querySnapshot.forEach((doc) => {
@@ -1243,16 +1235,11 @@
             jobsGrid.innerHTML = '<div class="loading"><div class="spinner"></div>채용공고를 불러오는 중입니다...</div>';
             
             try {
-                console.log('🔄 API 서버에서 데이터 로드 시작...');
+                console.log('🔄 Firebase에서 데이터 로드 시작...');
                 
-                // FastAPI 서버에서 채용공고 데이터 가져오기
-                const jobsResponse = await fetch('http://localhost:8003/api/jobs?limit=300');
-                if (!jobsResponse.ok) {
-                    throw new Error(`HTTP error! status: ${jobsResponse.status}`);
-                }
-                
-                allJobs = await jobsResponse.json();
-                console.log(`📊 API에서 총 ${allJobs.length}건 로드됨`);
+                // Firebase에서 직접 데이터 가져오기
+                await loadJobsFromFirebase();
+                return;
                 
                 // 데이터를 filteredJobs에 복사
                 filteredJobs = [...allJobs];
@@ -1987,19 +1974,13 @@
                     </div>
                 `;
                 
-                // API에서 첨부파일 정보 가져오기
-                const response = await fetch(`http://localhost:8003/api/jobs/${jobIdx}/attachments`);
-                const result = await response.json();
+                // Firebase/allJobs에서 첨부파일 정보 가져오기
+                const job = allJobs.find(j => j.idx === jobIdx);
                 
-                if (result.success && result.attachments) {
+                if (job && job.attachments) {
                     // 첨부파일 정보가 있으면 테이블 렌더링
-                    const attachmentTable = renderAttachmentTable(result.attachments);
+                    const attachmentTable = renderAttachmentTable(job.attachments);
                     attachmentDiv.innerHTML = attachmentTable;
-                    
-                    // 전역 job 데이터도 업데이트
-                    const job = allJobs.find(j => j.idx === jobIdx);
-                    if (job) {
-                        job.attachments = result.attachments;
                     }
                     
                     console.log(`✅ 첨부파일 로드 완료: ${jobIdx} (${result.source})`);
