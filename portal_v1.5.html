@@ -97,8 +97,8 @@
         
         const db = firebase.firestore();
         
-        // Firebase에서 채용공고 데이터 가져오기 (NewJobPortal 방식)
-        window.getJobsFromFirebase = async function() {
+        // Firebase에서 채용공고 데이터 가져오기 (portal_v1.5.html과 동일한 함수명)
+        window.loadJobsFromFirebase = async function() {
             try {
                 console.log('🔥 Firebase에서 직접 데이터 로딩 중...');
                 
@@ -1248,8 +1248,8 @@
             try {
                 console.log('🔥 Firebase에서 직접 데이터 로딩 중...');
                 
-                // Firebase에서 직접 데이터 가져오기 (NewJobPortal 방식)
-                const jobs = await getJobsFromFirebase();
+                // Firebase에서 직접 데이터 가져오기 (portal_v1.5.html 방식)
+                const jobs = await loadJobsFromFirebase();
                 
                 if (jobs && jobs.length > 0) {
                     allJobs = jobs;
