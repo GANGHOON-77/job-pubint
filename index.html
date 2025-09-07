@@ -1148,18 +1148,8 @@
 
     <!-- 메인 컨테이너 -->
     <div class="container">
-        <!-- EM1 영역 시작: 검색창 + 통계박스 -->
+        <!-- EM1 영역 시작: 통계박스 + 검색창 -->
         <div id="em1" class="em1-section">
-            <!-- 제어 패널 -->
-            <div class="controls">
-            <div class="search-box">
-                <input type="text" id="searchInput" placeholder="기관명, 채용제목으로 검색...">
-            </div>
-            <button class="load-btn" id="loadBtn" onclick="loadJobs()">
-                📥 채용정보 불러오기
-            </button>
-            </div>
-
             <!-- 통계 섹션 -->
             <div class="stats-grid" id="statsGrid">
             <div class="stat-card">
@@ -1182,6 +1172,16 @@
                 <div class="stat-label">등록기관</div>
                 <div class="stat-sublabel">(중복 제외)</div>
             </div>
+            </div>
+
+            <!-- 제어 패널 -->
+            <div class="controls">
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="기관명, 채용제목으로 검색...">
+            </div>
+            <button class="load-btn" id="loadBtn" onclick="loadJobs()">
+                📥 채용정보 불러오기
+            </button>
             </div>
         </div>
         <!-- EM1 영역 끝 -->
@@ -1932,3 +1932,4 @@
     </script>
 </body>
 </html>
+
