@@ -154,7 +154,8 @@ jobs:
         
         # 텔레그램 메시지 작성
         MESSAGE=$(cat <<EOF
-🚨 *채용정보 시스템 오류 발생*
+        
+ 
 
 📅 *실행 시간:* ${{ steps.time.outputs.korea_time }}
 🔧 *실행 모드:* ${{ steps.mode.outputs.mode }}
@@ -297,3 +298,4 @@ EOF
           -d chat_id="${TELEGRAM_CHAT_ID}" \
           -d text="${MESSAGE}" \
           -d parse_mode="Markdown"
+
