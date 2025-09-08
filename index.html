@@ -504,6 +504,109 @@
             opacity: 1;
         }
         
+        /* 통계박스 설명 스타일 - 아코디언 구조 */
+        .stats-description {
+            width: 100%;
+            margin: 15px auto 25px auto;
+            font-family: '맑은 고딕', 'Malgun Gothic', sans-serif;
+            max-width: 900px;
+        }
+        
+        .stats-toggle {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+        }
+        
+        .stats-toggle:hover {
+            background: #f1f5f9;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+        }
+        
+        .stats-toggle-header {
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #3b82f6;
+        }
+        
+        .stats-toggle-icon {
+            transition: transform 0.3s ease;
+            font-size: 14px;
+        }
+        
+        .stats-toggle.expanded .stats-toggle-icon {
+            transform: rotate(180deg);
+        }
+        
+        .stats-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+        
+        .stats-toggle.expanded .stats-content {
+            max-height: 200px;
+        }
+        
+        .stats-content-inner {
+            padding: 15px 20px;
+            font-size: 13px;
+            font-weight: 400;
+            color: #4a5568;
+            line-height: 1.5;
+            text-align: left;
+            border-top: 1px solid #e2e8f0;
+            background: #ffffff;
+        }
+        
+        /* 모바일에서 통계박스 및 설명 반응형 */
+        @media (max-width: 768px) {
+            .stats-grid {
+                padding: 15px 20px;
+                gap: 6px;
+            }
+            
+            .stat-number {
+                font-size: 24px;
+                margin-bottom: 4px;
+            }
+            
+            .stats-description {
+                font-size: 12px;
+                padding: 12px 15px;
+                margin: 12px auto 20px auto;
+                line-height: 1.4;
+                text-align: left;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .stats-grid {
+                padding: 12px 15px;
+                gap: 4px;
+            }
+            
+            .stat-number {
+                font-size: 20px;
+                margin-bottom: 3px;
+            }
+            
+            .stats-description {
+                font-size: 11px;
+                padding: 10px 12px;
+                margin: 10px auto 18px auto;
+                line-height: 1.3;
+            }
+        }
+        
         /* 비활성화 상태 */
         .agency-checkbox:disabled ~ .tab-label {
             cursor: not-allowed;
@@ -612,17 +715,20 @@
             transform: none;
         }
 
-        /* 통계 섹션 */
+        /* 통계 섹션 - 조정된 크기 */
         .stats-grid {
             background: #1976d2;
-            border-radius: 20px;
-            padding: 30px;
-            margin-bottom: 30px;
+            border-radius: 16px;
+            padding: 20px 25px;
+            margin-bottom: 15px;
             display: flex;
             justify-content: space-around;
             align-items: center;
             color: white;
-            gap: 10px;
+            gap: 8px;
+            max-width: 900px;
+            margin-left: auto;
+            margin-right: auto;
         }
 
         .stat-card {
@@ -632,10 +738,10 @@
         }
 
         .stat-number {
-            font-size: 32px;
+            font-size: 28px;
             font-weight: 700;
             color: white;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
             cursor: pointer;
             transition: all 0.2s ease;
         }
@@ -646,15 +752,15 @@
         }
 
         .stat-label {
-            font-size: 14px;
+            font-size: 13px;
             color: white;
             font-weight: 500;
         }
         
         .stat-sublabel {
-            font-size: 11px;
+            font-size: 10px;
             color: #fbbf24;
-            margin-top: 2px;
+            margin-top: 1px;
             font-weight: 400;
         }
 
@@ -1437,7 +1543,7 @@
                     </div>
                 </div>
                 <div class="filter-info">
-                    🎯 국가, 공공기관, 지자체 채용정보 모두를 이 사이트에서 확인 가능~^^
+                    🎯 국가, 공공기관, 지자체 채용정보 모두를 한 곳에서 확인 가능~^^
                 </div>
             </div>
         </div>
@@ -1470,6 +1576,24 @@
                 <div class="stat-label">등록기관</div>
                 <div class="stat-sublabel">(중복 제외)</div>
             </div>
+            </div>
+            
+            <!-- 통계박스 설명 - 아코디언 구조 -->
+            <div class="stats-description">
+                <div class="stats-toggle" onclick="toggleStatsInfo(this)">
+                    <div class="stats-toggle-header">
+                        <span>📊 통계 상세설명 보기</span>
+                        <span class="stats-toggle-icon">▼</span>
+                    </div>
+                    <div class="stats-content">
+                        <div class="stats-content-inner">
+                            본 사이트는 공공데이터를 활용하여 <strong>30일 이전의 채용 건수</strong>, <strong>7일전 최근 채용 건수</strong>와<br>
+                            <strong>마감일 3일 남은 임박 채용 건수</strong>를 직관적으로 표시합니다.<br><br>
+                            30일 이전 채용 건수를 표시한 이유는 보통 채용공고 기간이 최소 1주 ~ 최대 3주 정도임을 고려,<br>
+                            그 이전 채용정보는 해당 사이트에서 확인 가능합니다.
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- 제어 패널 -->
@@ -2301,6 +2425,11 @@
             setTimeout(() => {
                 tooltip.classList.remove('show');
             }, 200);
+        }
+        
+        // 통계 설명 토글 기능
+        function toggleStatsInfo(element) {
+            element.classList.toggle('expanded');
         }
         
         // 페이지 로드시 자동으로 데이터 불러오기
