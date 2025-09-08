@@ -45,6 +45,55 @@
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" rel="stylesheet">
     
+    <!-- Google Analytics (GA4) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-N8EHCJMKG4"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-N8EHCJMKG4', {
+            page_title: '대한민국 공공일터 채용정보',
+            page_location: window.location.href,
+            send_page_view: true,
+            custom_map: {
+                'custom_parameter_1': 'job_portal_type'
+            }
+        });
+        
+        // 맞춤 이벤트 추적 함수들
+        function trackJobClick(jobTitle, deptName, jobType) {
+            gtag('event', 'job_click', {
+                event_category: 'Job Interaction',
+                event_label: jobTitle,
+                custom_job_department: deptName,
+                custom_job_type: jobType
+            });
+        }
+        
+        function trackSearch(searchTerm) {
+            gtag('event', 'search', {
+                search_term: searchTerm,
+                event_category: 'Search'
+            });
+        }
+        
+        function trackFilter(filterType, filterValue) {
+            gtag('event', 'filter_used', {
+                event_category: 'Filter',
+                filter_type: filterType,
+                filter_value: filterValue
+            });
+        }
+        
+        function trackDownload(fileName, jobTitle) {
+            gtag('event', 'file_download', {
+                event_category: 'Downloads',
+                event_label: fileName,
+                custom_job_title: jobTitle
+            });
+        }
+    </script>
+    
     <!-- 구조화된 데이터 (Schema.org) -->
     <script type="application/ld+json">
     {
