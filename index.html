@@ -15,17 +15,17 @@
     <link rel="manifest" href="manifest.json">
     
     <!-- SEO 최적화 메타태그 -->
-    <title>대한민국 공공기관 채용정보 | 고용·채용·일자리·일터·채용정보 취업포털</title>
-    <meta name="description" content="대한민국 정부기관, 공공기관, 지자체의 최신 채용정보와 일자리 정보를 실시간으로! 고용, 채용, 일터, 채용정보 관련 모든 정보를 제공하는 대한민국 최대 공공일자리 취업포털.">
+    <title>대한민국 공공일터 채용정보 | 고용·채용·일자리·일터·채용정보 취업포털</title>
+    <meta name="description" content="대한민국 정부기관, 공공기관, 지자체의 최신 채용정보와 일자리 정보를 실시간으로! 고용, 채용, 일터, 채용정보 관련 모든 정보를 제공하는 대한민국 최대 공공일터 취업포털.">
     <meta name="keywords" content="고용, 채용, 일자리, 일터, 채용정보, 공공기관 채용, 정부기관 채용, 지자체 채용, 공무원 채용, 채용공고, 취업정보, 구인구직, 공공일자리, 정규직 채용, 계약직 채용">
-    <meta name="author" content="대한민국 공공기관 채용정보 포털">
+    <meta name="author" content="대한민국 공공일터 채용정보 포털">
     <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
     <meta name="language" content="Korean">
     <meta name="geo.region" content="KR">
     <meta name="geo.country" content="Korea">
     
     <!-- Open Graph 메타태그 (소셜미디어 공유용) -->
-    <meta property="og:title" content="대한민국 공공기관 채용정보 | 고용·채용·일자리·일터·채용정보">
+    <meta property="og:title" content="대한민국 공공일터 채용정보 | 고용·채용·일자리·일터·채용정보">
     <meta property="og:description" content="정부기관, 공공기관, 지자체의 최신 채용정보와 일자리 정보를 실시간으로 확인하세요. 공무원 채용공고부터 공공기관 정규직·계약직 채용정보까지 모든 채용정보를 한곳에서!">
     <meta property="og:type" content="website">
     <meta property="og:locale" content="ko_KR">
@@ -50,11 +50,11 @@
     {
         "@context": "https://schema.org",
         "@type": "WebSite",
-        "name": "대한민국 공공기관 채용정보",
+        "name": "대한민국 공공일터 채용정보",
         "description": "고용, 채용, 일자리, 일터, 채용정보 관련 공공기관 채용정보 포털",
         "publisher": {
             "@type": "Organization",
-            "name": "대한민국 공공기관 채용정보 포털"
+            "name": "대한민국 공공일터 채용정보 포털"
         },
         "potentialAction": {
             "@type": "SearchAction",
@@ -1023,6 +1023,164 @@
             color: #475569;
         }
 
+        /* 푸터 스타일 */
+        .footer {
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            color: #e2e8f0;
+            margin-top: 80px;
+            padding: 60px 0 30px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .footer-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .footer-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 40px;
+            margin-bottom: 40px;
+            padding-bottom: 40px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .footer-section {
+            flex: 1;
+        }
+
+        .footer-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 12px;
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .footer-desc {
+            font-size: 14px;
+            color: #94a3b8;
+            line-height: 1.6;
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 60px;
+        }
+
+        .footer-link-group {
+            min-width: 150px;
+        }
+
+        .footer-link-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 16px;
+        }
+
+        .footer-link-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .footer-link-list li {
+            margin-bottom: 12px;
+        }
+
+        .footer-link-list a {
+            color: #94a3b8;
+            text-decoration: none;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            display: inline-block;
+            position: relative;
+        }
+
+        .footer-link-list a:hover {
+            color: #3b82f6;
+            transform: translateX(5px);
+        }
+
+        .footer-link-list a::before {
+            content: '→';
+            position: absolute;
+            left: -20px;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .footer-link-list a:hover::before {
+            opacity: 1;
+            left: -15px;
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 20px;
+        }
+
+        .footer-copyright {
+            font-size: 13px;
+            color: #64748b;
+            margin: 0;
+        }
+
+        /* 푸터 반응형 */
+        @media (max-width: 768px) {
+            .footer {
+                margin-top: 50px;
+                padding: 40px 0 20px;
+            }
+
+            .footer-content {
+                flex-direction: column;
+                gap: 30px;
+            }
+
+            .footer-links {
+                flex-direction: column;
+                gap: 30px;
+                width: 100%;
+            }
+
+            .footer-title {
+                font-size: 20px;
+            }
+
+            .footer-link-title {
+                font-size: 15px;
+            }
+
+            .footer-link-list a {
+                font-size: 13px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .footer {
+                padding: 30px 0 20px;
+            }
+
+            .footer-title {
+                font-size: 18px;
+            }
+
+            .footer-desc {
+                font-size: 13px;
+            }
+
+            .footer-copyright {
+                font-size: 12px;
+            }
+        }
+
         /* 반응형 */
         @media (max-width: 1024px) {
             .modal-content-layout {
@@ -1121,7 +1279,7 @@
     <div class="header">
         <div class="header-content">
             <div>
-                <h1>🏢 <span class="title-highlight">대한민국</span> <span class="title-main">공공기관</span> <span class="title-highlight">채용정보</span></h1>
+                <h1>🏢 <span class="title-highlight">대한민국</span> <span class="title-main">공공일터</span> <span class="title-highlight">채용정보</span></h1>
                 
                 <!-- 기관 유형 필터 -->
                 <div class="agency-filter">
@@ -1203,6 +1361,40 @@
         <!-- EM2 영역 끝 -->
 
     </div>
+
+    <!-- 푸터 -->
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3 class="footer-title">대한민국 공공일터 채용정보</h3>
+                    <p class="footer-desc">정부기관, 공공기관, 지자체의 모든 채용정보를 한곳에서</p>
+                </div>
+                
+                <div class="footer-links">
+                    <div class="footer-link-group">
+                        <h4 class="footer-link-title">서비스 정보</h4>
+                        <ul class="footer-link-list">
+                            <li><a href="about.html">사이트 소개</a></li>
+                            <li><a href="contact.html">문의하기</a></li>
+                        </ul>
+                    </div>
+                    
+                    <div class="footer-link-group">
+                        <h4 class="footer-link-title">이용 안내</h4>
+                        <ul class="footer-link-list">
+                            <li><a href="terms.html">이용약관</a></li>
+                            <li><a href="privacy.html">개인정보처리방침</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p class="footer-copyright">© 2025 대한민국 공공일터 채용정보. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
 
     <!-- 상세보기 모달 -->
     <div id="jobModal" class="modal">
