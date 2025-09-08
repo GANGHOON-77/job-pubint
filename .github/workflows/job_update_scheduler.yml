@@ -153,22 +153,7 @@ jobs:
         fi
         
         # 텔레그램 메시지 작성
-        MESSAGE=$(cat <<EOF
-        
- 
-
-📅 *실행 시간:* ${{ steps.time.outputs.korea_time }}
-🔧 *실행 모드:* ${{ steps.mode.outputs.mode }}
-🌐 *트리거:* ${{ github.event_name }}
-
-❌ *오류 내용:*
-${JOB_ERROR}${CLEANUP_ERROR}
-
-🔗 [GitHub Actions 로그 확인](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
-
-📊 10분 간격 스케줄 (144회/일) | 🕐 UTC: ${{ steps.time.outputs.utc_time }}
-EOF
-)
+        MESSAGE="🚨 *채용정보 시스템 오류 발생*%0A%0A📅 *실행 시간:* ${{ steps.time.outputs.korea_time }}%0A🔧 *실행 모드:* ${{ steps.mode.outputs.mode }}%0A🌐 *트리거:* ${{ github.event_name }}%0A%0A❌ *오류 내용:*%0A${JOB_ERROR}${CLEANUP_ERROR}%0A🔗 [GitHub Actions 로그 확인](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})%0A%0A📊 10분 간격 스케줄 (144회/일) | 🕐 UTC: ${{ steps.time.outputs.utc_time }}"
         
         # 텔레그램 메시지 전송
         curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
@@ -184,15 +169,7 @@ EOF
         TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
       run: |
         # 텔레그램 성공 메시지 작성
-        MESSAGE=$(cat <<EOF
-🎉 *30일 경과 데이터 정리 완료*
-
-📅 *실행 시간:* ${{ steps.time.outputs.korea_time }}
-⏱️ *소요 시간:* ${{ steps.cleanup_jobs.outputs.cleanup_duration }}초
-
-🗑️ 정기 정리 완료 | 📊 시스템 정상 운영 중
-EOF
-)
+        MESSAGE="🎉 *30일 경과 데이터 정리 완료*%0A%0A📅 *실행 시간:* ${{ steps.time.outputs.korea_time }}%0A⏱️ *소요 시간:* ${{ steps.cleanup_jobs.outputs.cleanup_duration }}초%0A%0A🗑️ 정기 정리 완료 | 📊 시스템 정상 운영 중"
         
         # 텔레그램 메시지 전송
         curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
@@ -283,19 +260,10 @@ EOF
         TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
       run: |
         # 텔레그램 주간 보고 메시지 작성
-        MESSAGE=$(cat <<EOF
-📈 *채용정보 시스템 주간 리포트*
-
-📊 *스케줄:* 10분 간격 (1,008회/주)
-🗑️ *정리 작업:* 일일 1회 (7회/주)
-✅ *시스템 상태:* 정상 운영
-📅 *보고 시점:* ${{ steps.time.outputs.korea_time }}
-EOF
-)
+        MESSAGE="📈 *채용정보 시스템 주간 리포트*%0A%0A📊 *스케줄:* 10분 간격 (1,008회/주)%0A🗑️ *정리 작업:* 일일 1회 (7회/주)%0A✅ *시스템 상태:* 정상 운영%0A📅 *보고 시점:* ${{ steps.time.outputs.korea_time }}"
         
         # 텔레그램 메시지 전송
         curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
           -d chat_id="${TELEGRAM_CHAT_ID}" \
           -d text="${MESSAGE}" \
           -d parse_mode="Markdown"
-
