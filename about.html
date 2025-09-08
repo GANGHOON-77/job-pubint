@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>사이트 소개 | 대한민국 공공일터 채용정보</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" rel="stylesheet">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Pretendard Variable', 'Pretendard', -apple-system, BlinkMacSystemFont, 'Noto Sans KR', 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #f5f6fa 0%, #e8eaf0 100%);
+            color: #2c3e50;
+            line-height: 1.8;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: #ffffff;
+            padding: 30px 0;
+            border-bottom: 1px solid #e0e0e0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1565c0;
+        }
+
+        .back-button {
+            display: inline-block;
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .back-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .about-hero {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 60px;
+            border-radius: 20px;
+            text-align: center;
+            margin-bottom: 40px;
+            box-shadow: 0 20px 40px rgba(102, 126, 234, 0.3);
+        }
+
+        .about-hero h1 {
+            font-size: 42px;
+            font-weight: 800;
+            margin-bottom: 20px;
+        }
+
+        .about-hero p {
+            font-size: 20px;
+            opacity: 0.95;
+        }
+
+        .about-section {
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+        }
+
+        .section-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1a202c;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #3b82f6;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-icon {
+            font-size: 32px;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+
+        .feature-card {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            padding: 30px;
+            border-radius: 12px;
+            border-left: 4px solid #3b82f6;
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+
+        .feature-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #334155;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .feature-desc {
+            color: #64748b;
+            font-size: 15px;
+            line-height: 1.6;
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .comparison-table th,
+        .comparison-table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .comparison-table th {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            font-weight: 600;
+            color: #1e293b;
+        }
+
+        .comparison-table tr:hover {
+            background: #f8fafc;
+        }
+
+        .check-mark {
+            color: #10b981;
+            font-weight: bold;
+        }
+
+        .cross-mark {
+            color: #ef4444;
+            font-weight: bold;
+        }
+
+        .highlight-box {
+            background: linear-gradient(135deg, #fef3c7 0%, #fed7aa 100%);
+            padding: 25px;
+            border-radius: 12px;
+            margin: 25px 0;
+            border-left: 4px solid #f59e0b;
+        }
+
+        .highlight-box h3 {
+            color: #92400e;
+            margin-bottom: 10px;
+        }
+
+        .highlight-box p {
+            color: #78350f;
+        }
+
+        .data-source {
+            background: linear-gradient(135deg, #ede9fe 0%, #ddd6fe 100%);
+            padding: 25px;
+            border-radius: 12px;
+            margin-top: 25px;
+        }
+
+        .data-source h3 {
+            color: #7c3aed;
+            margin-bottom: 15px;
+        }
+
+        .data-source ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .data-source li {
+            color: #6b21a8;
+            padding: 8px 0;
+            padding-left: 25px;
+            position: relative;
+        }
+
+        .data-source li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #7c3aed;
+            font-weight: bold;
+        }
+
+        @media (max-width: 768px) {
+            .about-hero {
+                padding: 40px 30px;
+            }
+
+            .about-hero h1 {
+                font-size: 32px;
+            }
+
+            .about-section {
+                padding: 30px 20px;
+            }
+
+            .header-content {
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            .comparison-table {
+                font-size: 14px;
+            }
+
+            .comparison-table th,
+            .comparison-table td {
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <h1>🏢 대한민국 공공일터 채용정보</h1>
+            <a href="9월 8일 최종 배포버전.html" class="back-button">← 메인으로 돌아가기</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="about-hero">
+            <h1>대한민국 공공일터 채용정보</h1>
+            <p>정부·공공기관·지방자치단체 채용정보를 한눈에!</p>
+        </div>
+
+        <div class="about-section">
+            <h2 class="section-title">
+                <span class="section-icon">🎯</span>
+                서비스 소개
+            </h2>
+            <p style="font-size: 16px; color: #475569; line-height: 1.8;">
+                <strong>대한민국 공공일터 채용정보</strong>는 대한민국의 정부·공공기관·지방자치단체 채용정보를 
+                한눈에 볼 수 있도록 만든 통합 채용정보 포털입니다. 구직자 또는 구직 예정자들에게 
+                신뢰할 수 있는 채용 정보를 더욱 편리하고 직관적으로 제공하는 것을 목표로 합니다.
+            </p>
+
+            <div class="highlight-box">
+                <h3>🚀 우리의 미션</h3>
+                <p>복잡하고 분산된 공공기관 채용정보를 한 곳에서 쉽고 빠르게 확인할 수 있도록 
+                최적화된 사용자 경험을 제공합니다.</p>
+            </div>
+        </div>
+
+        <div class="about-section">
+            <h2 class="section-title">
+                <span class="section-icon">✨</span>
+                주요 기능
+            </h2>
+            
+            <div class="features-grid">
+                <div class="feature-card">
+                    <h3 class="feature-title">
+                        <span>📋</span>
+                        카드형 리스트
+                    </h3>
+                    <p class="feature-desc">
+                        채용공고를 한눈에 파악할 수 있는 직관적인 카드형 디자인으로 
+                        필요한 정보를 빠르게 확인할 수 있습니다.
+                    </p>
+                </div>
+
+                <div class="feature-card">
+                    <h3 class="feature-title">
+                        <span>⏰</span>
+                        마감 D-Day 표시
+                    </h3>
+                    <p class="feature-desc">
+                        각 채용공고의 마감일을 D-Day로 표시하여 
+                        중요한 지원 기회를 놓치지 않도록 도와드립니다.
+                    </p>
+                </div>
+
+                <div class="feature-card">
+                    <h3 class="feature-title">
+                        <span>🔍</span>
+                        상세정보 모달
+                    </h3>
+                    <p class="feature-desc">
+                        페이지 이동 없이 모달창에서 채용공고의 
+                        상세 정보를 빠르게 확인할 수 있습니다.
+                    </p>
+                </div>
+
+                <div class="feature-card">
+                    <h3 class="feature-title">
+                        <span>🏢</span>
+                        기관별 검색
+                    </h3>
+                    <p class="feature-desc">
+                        정부기관, 공공기관, 지자체별로 필터링하여 
+                        원하는 기관의 채용정보만 선택적으로 확인 가능합니다.
+                    </p>
+                </div>
+
+                <div class="feature-card">
+                    <h3 class="feature-title">
+                        <span>📱</span>
+                        반응형 디자인
+                    </h3>
+                    <p class="feature-desc">
+                        PC, 태블릿, 모바일 등 모든 기기에서 
+                        최적화된 화면으로 이용할 수 있습니다.
+                    </p>
+                </div>
+
+                <div class="feature-card">
+                    <h3 class="feature-title">
+                        <span>🔄</span>
+                        실시간 업데이트
+                    </h3>
+                    <p class="feature-desc">
+                        자동 업데이트 시스템으로 항상 최신 채용정보를 
+                        제공받을 수 있습니다.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="about-section">
+            <h2 class="section-title">
+                <span class="section-icon">🆚</span>
+                기존 사이트와의 차이점
+            </h2>
+            
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>비교 항목</th>
+                        <th>기존 사이트 (나라일터, 잡알리오)</th>
+                        <th>대한민국 공공일터 채용정보</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>정보 표시 방식</strong></td>
+                        <td>리스트형 (테이블)</td>
+                        <td>카드형 디자인 <span class="check-mark">✓</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>기본 정보 제공</strong></td>
+                        <td>제목, 기관명만 표시</td>
+                        <td>채용인원, 고용형태, 근무지 등 포함 <span class="check-mark">✓</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>상세 정보 확인</strong></td>
+                        <td>새 페이지로 이동 필요</td>
+                        <td>모달창에서 즉시 확인 <span class="check-mark">✓</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>마감일 표시</strong></td>
+                        <td>날짜만 표시</td>
+                        <td>D-Day 형식으로 직관적 표시 <span class="check-mark">✓</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>모바일 최적화</strong></td>
+                        <td>제한적</td>
+                        <td>완벽한 반응형 디자인 <span class="check-mark">✓</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>필터링 기능</strong></td>
+                        <td>복잡한 검색 옵션</td>
+                        <td>간단하고 직관적인 필터 <span class="check-mark">✓</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="about-section">
+            <h2 class="section-title">
+                <span class="section-icon">📊</span>
+                데이터 출처
+            </h2>
+            
+            <p style="font-size: 16px; color: #475569; margin-bottom: 20px;">
+                본 사이트는 공공 데이터 API 및 기관 공개자료를 기반으로 하여 
+                신뢰할 수 있는 채용 정보만을 제공합니다.
+            </p>
+
+            <div class="data-source">
+                <h3>주요 데이터 출처</h3>
+                <ul>
+                    <li>나라일터 (gojobs.go.kr) - 정부 통합 채용정보</li>
+                    <li>잡알리오 (job.alio.go.kr) - 공공기관 채용정보</li>
+                    <li>각 지방자치단체 채용 포털</li>
+                    <li>공공기관 공식 홈페이지 채용공고</li>
+                </ul>
+            </div>
+
+            <div class="highlight-box" style="margin-top: 30px;">
+                <h3>📌 안내사항</h3>
+                <p>
+                    모든 채용정보는 해당 기관의 공식 발표를 기준으로 하며, 
+                    실제 지원 시에는 반드시 해당 기관의 공식 채용공고를 확인하시기 바랍니다.
+                </p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

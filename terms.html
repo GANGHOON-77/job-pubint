@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>이용약관 | 대한민국 공공일터 채용정보</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" rel="stylesheet">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Pretendard Variable', 'Pretendard', -apple-system, BlinkMacSystemFont, 'Noto Sans KR', 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #f5f6fa 0%, #e8eaf0 100%);
+            color: #2c3e50;
+            line-height: 1.8;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: #ffffff;
+            padding: 30px 0;
+            border-bottom: 1px solid #e0e0e0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1565c0;
+        }
+
+        .back-button {
+            display: inline-block;
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .back-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .terms-wrapper {
+            background: white;
+            border-radius: 16px;
+            padding: 50px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+        }
+
+        .terms-title {
+            font-size: 36px;
+            font-weight: 700;
+            color: #1a202c;
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 3px solid #3b82f6;
+        }
+
+        .terms-date {
+            color: #64748b;
+            font-size: 14px;
+            margin-bottom: 40px;
+        }
+
+        .terms-intro {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 40px;
+            border-left: 4px solid #3b82f6;
+        }
+
+        .terms-article {
+            margin-bottom: 40px;
+            padding: 25px;
+            background: linear-gradient(135deg, #fafbfc 0%, #f7f8fa 100%);
+            border-radius: 12px;
+            border-left: 4px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .terms-article:hover {
+            border-left-color: #3b82f6;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+
+        .article-title {
+            font-size: 22px;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .article-number {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .article-content {
+            color: #475569;
+            padding-left: 42px;
+        }
+
+        .article-list {
+            list-style: none;
+            padding: 0;
+            margin: 15px 0;
+        }
+
+        .article-list li {
+            padding: 10px 0;
+            padding-left: 25px;
+            position: relative;
+            line-height: 1.6;
+        }
+
+        .article-list li:before {
+            content: "•";
+            position: absolute;
+            left: 0;
+            color: #3b82f6;
+            font-weight: bold;
+            font-size: 20px;
+        }
+
+        .warning-box {
+            background: linear-gradient(135deg, #fef3c7 0%, #fed7aa 100%);
+            padding: 25px;
+            border-radius: 12px;
+            margin: 20px 0;
+            border-left: 4px solid #f59e0b;
+        }
+
+        .warning-box h4 {
+            color: #92400e;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .warning-box p {
+            color: #78350f;
+            line-height: 1.6;
+        }
+
+        .important-notice {
+            background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+            padding: 25px;
+            border-radius: 12px;
+            margin: 30px 0;
+            border-left: 4px solid #ef4444;
+        }
+
+        .important-notice h4 {
+            color: #991b1b;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+
+        .important-notice p {
+            color: #7f1d1d;
+        }
+
+        .agreement-section {
+            background: linear-gradient(135deg, #ede9fe 0%, #ddd6fe 100%);
+            padding: 30px;
+            border-radius: 12px;
+            margin-top: 40px;
+            text-align: center;
+        }
+
+        .agreement-text {
+            color: #6b21a8;
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+
+        .agreement-button {
+            display: inline-block;
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .agreement-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(16, 185, 129, 0.3);
+        }
+
+        @media (max-width: 768px) {
+            .terms-wrapper {
+                padding: 30px 20px;
+            }
+
+            .terms-title {
+                font-size: 28px;
+            }
+
+            .article-title {
+                font-size: 18px;
+            }
+
+            .header-content {
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            .article-content {
+                padding-left: 0;
+                margin-top: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <h1>🏢 대한민국 공공일터 채용정보</h1>
+            <a href="9월 8일 최종 배포버전.html" class="back-button">← 메인으로 돌아가기</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="terms-wrapper">
+            <h1 class="terms-title">이용약관</h1>
+            <div class="terms-date">시행일: 2025년 9월 8일</div>
+
+            <div class="terms-intro">
+                <p><strong>대한민국 공공일터 채용정보</strong> 서비스를 이용해 주셔서 감사합니다. 
+                본 약관은 이용자가 서비스를 이용함에 있어 필요한 권리와 의무, 책임사항 등을 규정하고 있습니다. 
+                서비스를 이용하시기 전에 본 약관을 주의 깊게 읽어주시기 바랍니다.</p>
+            </div>
+
+            <div class="terms-article">
+                <h2 class="article-title">
+                    <span class="article-number">1</span>
+                    <span>제1조 (목적)</span>
+                </h2>
+                <div class="article-content">
+                    <p>본 약관은 대한민국 공공일터 채용정보(이하 "사이트")가 제공하는 모든 서비스의 이용 조건과 절차, 
+                    이용자의 권리·의무 및 책임사항을 규정함을 목적으로 합니다.</p>
+                </div>
+            </div>
+
+            <div class="terms-article">
+                <h2 class="article-title">
+                    <span class="article-number">2</span>
+                    <span>제2조 (서비스의 제공)</span>
+                </h2>
+                <div class="article-content">
+                    <ul class="article-list">
+                        <li>사이트는 대한민국 정부, 공공기관, 지방자치단체 등의 채용 정보를 수집·가공하여 제공하는 것을 주요 목적으로 합니다.</li>
+                        <li>사이트는 서비스 품질 개선을 위해 사전 공지 후 언제든지 서비스 내용을 변경할 수 있습니다.</li>
+                        <li>사이트는 무료로 제공되며, 향후에도 무료 서비스 원칙을 유지할 예정입니다.</li>
+                        <li>서비스는 연중무휴, 1일 24시간 제공함을 원칙으로 하나, 시스템 점검 등의 사유로 일시적으로 중단될 수 있습니다.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="terms-article">
+                <h2 class="article-title">
+                    <span class="article-number">3</span>
+                    <span>제3조 (이용자의 의무)</span>
+                </h2>
+                <div class="article-content">
+                    <p style="margin-bottom: 15px;">이용자는 다음 각 호의 행위를 하여서는 안 됩니다:</p>
+                    <ul class="article-list">
+                        <li>사이트를 법령과 본 약관에 위배되는 목적으로 이용하는 행위</li>
+                        <li>타인의 개인정보를 도용하거나 허위 정보를 유포하는 행위</li>
+                        <li>서비스 운영을 고의로 방해하거나 서버에 부담을 주는 행위</li>
+                        <li>사이트의 정보를 무단으로 수집하여 영리 목적으로 이용하는 행위</li>
+                        <li>기타 공공질서 및 미풍양속에 위반되는 행위</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="terms-article">
+                <h2 class="article-title">
+                    <span class="article-number">4</span>
+                    <span>제4조 (면책조항)</span>
+                </h2>
+                <div class="article-content">
+                    <div class="warning-box">
+                        <h4>
+                            <span>⚠️</span>
+                            <span>중요 안내</span>
+                        </h4>
+                        <p>본 사이트는 채용 공고의 정확성과 적시성을 보장하기 위해 최선을 다하고 있으나, 
+                        공공데이터 API 요청 한도로 인해 5분 지연으로 정보를 가져오며, 
+                        원문 공고와 차이가 있을 수 있습니다. <strong>반드시 원문 공고를 참조하시기 바랍니다.</strong></p>
+                    </div>
+                    
+                    <ul class="article-list">
+                        <li>최종 지원 및 채용 여부는 각 기관의 공식 공고문을 기준으로 합니다.</li>
+                        <li>사이트는 제공되는 정보의 오류로 인한 손해에 대해 책임을 지지 않습니다.</li>
+                        <li>각 기관의 채용 절차 및 결과에 대해 사이트는 어떠한 책임도 지지 않습니다.</li>
+                        <li>천재지변, 시스템 장애 등 불가항력적 사유로 인한 서비스 중단에 대해 책임을 지지 않습니다.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="terms-article">
+                <h2 class="article-title">
+                    <span class="article-number">5</span>
+                    <span>제5조 (지적재산권)</span>
+                </h2>
+                <div class="article-content">
+                    <ul class="article-list">
+                        <li>사이트가 제공하는 서비스의 디자인, 텍스트, 스크립트, 그래픽 등은 사이트의 지적재산권에 속합니다.</li>
+                        <li>이용자는 사이트의 사전 승인 없이 서비스의 내용을 복제, 전송, 배포할 수 없습니다.</li>
+                        <li>채용 공고의 원문 저작권은 각 해당 기관에 있습니다.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="terms-article">
+                <h2 class="article-title">
+                    <span class="article-number">6</span>
+                    <span>제6조 (분쟁 해결)</span>
+                </h2>
+                <div class="article-content">
+                    <ul class="article-list">
+                        <li>본 약관에 따른 분쟁은 대한민국 법률에 따라 해결합니다.</li>
+                        <li>서비스 이용과 관련하여 발생한 분쟁은 민사소송법상의 관할법원에서 해결합니다.</li>
+                        <li>이용자와 사이트 간 발생한 분쟁은 상호 협의하여 원만하게 해결함을 원칙으로 합니다.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="terms-article">
+                <h2 class="article-title">
+                    <span class="article-number">7</span>
+                    <span>제7조 (약관의 변경)</span>
+                </h2>
+                <div class="article-content">
+                    <ul class="article-list">
+                        <li>사이트는 필요한 경우 약관을 변경할 수 있으며, 변경된 약관은 사이트에 공지함으로써 효력이 발생합니다.</li>
+                        <li>이용자는 변경된 약관에 동의하지 않을 경우 서비스 이용을 중단할 수 있습니다.</li>
+                        <li>약관 변경 후에도 서비스를 계속 이용하는 경우 변경된 약관에 동의한 것으로 간주합니다.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="important-notice">
+                <h4>📢 서비스 이용 시 주의사항</h4>
+                <p>본 사이트에서 제공하는 채용정보는 참고용이며, 실제 지원 시에는 반드시 해당 기관의 
+                공식 채용공고를 확인하시기 바랍니다. 정보의 정확성을 위해 최선을 다하고 있으나, 
+                시스템 특성상 실시간 반영이 어려울 수 있습니다.</p>
+            </div>
+
+            <div class="agreement-section">
+                <p class="agreement-text">
+                    본 이용약관을 충분히 읽고 이해하셨으며, 서비스 이용 시 본 약관에 동의하신 것으로 간주됩니다.
+                </p>
+                <a href="9월 8일 최종 배포버전.html" class="agreement-button">동의하고 서비스 이용하기</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>문의하기 | 대한민국 공공일터 채용정보</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" rel="stylesheet">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Pretendard Variable', 'Pretendard', -apple-system, BlinkMacSystemFont, 'Noto Sans KR', 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #f5f6fa 0%, #e8eaf0 100%);
+            color: #2c3e50;
+            line-height: 1.8;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: #ffffff;
+            padding: 30px 0;
+            border-bottom: 1px solid #e0e0e0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1565c0;
+        }
+
+        .back-button {
+            display: inline-block;
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .back-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .contact-hero {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            padding: 60px;
+            border-radius: 20px;
+            text-align: center;
+            margin-bottom: 40px;
+            box-shadow: 0 20px 40px rgba(16, 185, 129, 0.3);
+        }
+
+        .contact-hero h1 {
+            font-size: 42px;
+            font-weight: 800;
+            margin-bottom: 20px;
+        }
+
+        .contact-hero p {
+            font-size: 20px;
+            opacity: 0.95;
+        }
+
+        .contact-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .contact-card {
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+        }
+
+        .contact-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.12);
+        }
+
+        .contact-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            margin-bottom: 20px;
+        }
+
+        .contact-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1a202c;
+            margin-bottom: 15px;
+        }
+
+        .contact-info {
+            color: #64748b;
+            font-size: 16px;
+            line-height: 1.8;
+        }
+
+        .contact-highlight {
+            color: #3b82f6;
+            font-weight: 600;
+            font-size: 18px;
+        }
+
+        .email-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 20px;
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .email-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.4);
+        }
+
+        .notice-section {
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+        }
+
+        .notice-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1a202c;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #f59e0b;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .notice-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .notice-list li {
+            padding: 15px 0;
+            padding-left: 35px;
+            position: relative;
+            color: #475569;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .notice-list li:last-child {
+            border-bottom: none;
+        }
+
+        .notice-list li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #10b981;
+            font-weight: bold;
+            font-size: 20px;
+        }
+
+        .faq-section {
+            background: linear-gradient(135deg, #fef3c7 0%, #fed7aa 100%);
+            border-radius: 16px;
+            padding: 40px;
+            margin-bottom: 30px;
+        }
+
+        .faq-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: #92400e;
+            margin-bottom: 25px;
+        }
+
+        .faq-item {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .faq-question {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .faq-answer {
+            color: #64748b;
+            padding-left: 30px;
+            line-height: 1.6;
+        }
+
+        .response-time {
+            background: linear-gradient(135deg, #ede9fe 0%, #ddd6fe 100%);
+            border-radius: 12px;
+            padding: 25px;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .response-time h3 {
+            color: #7c3aed;
+            margin-bottom: 10px;
+            font-size: 20px;
+        }
+
+        .response-time p {
+            color: #6b21a8;
+            font-size: 16px;
+        }
+
+        @media (max-width: 768px) {
+            .contact-hero {
+                padding: 40px 30px;
+            }
+
+            .contact-hero h1 {
+                font-size: 32px;
+            }
+
+            .contact-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .header-content {
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            .contact-card {
+                padding: 30px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <h1>🏢 대한민국 공공일터 채용정보</h1>
+            <a href="9월 8일 최종 배포버전.html" class="back-button">← 메인으로 돌아가기</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="contact-hero">
+            <h1>문의하기</h1>
+            <p>서비스 이용에 궁금한 점이 있으신가요?</p>
+        </div>
+
+        <div class="contact-grid">
+            <div class="contact-card">
+                <div class="contact-icon">📧</div>
+                <h2 class="contact-title">이메일 문의</h2>
+                <div class="contact-info">
+                    <p>서비스와 관련한 모든 문의를 받고 있습니다.</p>
+                    <p class="contact-highlight">techman4542@gmail.com</p>
+                    <a href="mailto:techman4542@gmail.com?subject=공공 채용 문의" class="email-button">
+                        <span>📮</span>
+                        <span>이메일 보내기</span>
+                    </a>
+                </div>
+            </div>
+
+            <div class="contact-card">
+                <div class="contact-icon">⏰</div>
+                <h2 class="contact-title">운영 시간</h2>
+                <div class="contact-info">
+                    <p><strong>문의 가능 시간</strong></p>
+                    <p class="contact-highlight">평일 09:00 ~ 18:00</p>
+                    <p style="margin-top: 15px; color: #94a3b8; font-size: 14px;">
+                        * 주말 및 공휴일은 휴무입니다.<br>
+                        * 휴무일에 접수된 문의는 영업일 기준으로 순차적으로 처리됩니다.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="notice-section">
+            <h2 class="notice-title">
+                <span>📌</span>
+                문의 시 안내사항
+            </h2>
+            <ul class="notice-list">
+                <li>빠른 응대를 위해 이메일 제목에 <strong>"공공 채용 문의"</strong>라고 적어주시면 감사하겠습니다.</li>
+                <li>문의 내용은 가능한 한 구체적으로 작성해 주시면 더 정확한 답변을 드릴 수 있습니다.</li>
+                <li>채용 공고 관련 문의 시 공고번호 또는 기관명을 함께 알려주시면 도움이 됩니다.</li>
+                <li>서비스 개선 제안이나 추가 기능 요청도 환영합니다.</li>
+            </ul>
+
+            <div class="response-time">
+                <h3>답변 소요 시간</h3>
+                <p>영업일 기준 1~2일 이내</p>
+            </div>
+        </div>
+
+        <div class="faq-section">
+            <h2 class="faq-title">자주 묻는 질문 (FAQ)</h2>
+            
+            <div class="faq-item">
+                <div class="faq-question">
+                    <span>❓</span>
+                    <span>채용공고는 얼마나 자주 업데이트되나요?</span>
+                </div>
+                <div class="faq-answer">
+                    매일 자동으로 업데이트되며, 주요 기관의 신규 공고는 실시간으로 반영됩니다.
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    <span>❓</span>
+                    <span>회원가입이 필요한가요?</span>
+                </div>
+                <div class="faq-answer">
+                    아니요, 별도의 회원가입 없이 모든 서비스를 무료로 이용하실 수 있습니다.
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    <span>❓</span>
+                    <span>모바일에서도 이용할 수 있나요?</span>
+                </div>
+                <div class="faq-answer">
+                    네, 반응형 웹디자인으로 제작되어 모바일, 태블릿, PC 등 모든 기기에서 최적화된 화면으로 이용 가능합니다.
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    <span>❓</span>
+                    <span>채용공고 지원은 어떻게 하나요?</span>
+                </div>
+                <div class="faq-answer">
+                    각 채용공고의 '지원하기' 버튼을 클릭하면 해당 기관의 공식 채용 페이지로 연결됩니다. 
+                    실제 지원은 각 기관의 채용 시스템을 통해 진행하시면 됩니다.
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
