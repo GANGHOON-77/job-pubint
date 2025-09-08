@@ -22,8 +22,11 @@ class AutoJobUpdater:
     def __init__(self):
         """GitHub Actions용 자동 업데이터 초기화"""
         
-        # 환경 변수에서 설정 로드
-        self.service_key = os.getenv('MOEF_API_KEY', '1bmDITdGFoaDTSrbT6Uyz8bFdlIL3nydHgRu0xQtXO8SiHlCrOJKv+JNSythF12BiijhVB3qE96/4Jxr70zUNg==')
+        # 환경 변수에서 설정 로드 (보안 강화 - 하드코딩 제거)
+        self.service_key = os.getenv('MOEF_API_KEY')
+        if not self.service_key:
+            logger.error("MOEF_API_KEY 환경변수가 설정되지 않았습니다.")
+            sys.exit(1)
         self.base_url = "http://apis.data.go.kr/1051000/recruitment/list"
         
         # Firebase 초기화
