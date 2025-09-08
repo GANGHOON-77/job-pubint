@@ -19,11 +19,11 @@ on:
         - new_jobs
         - cleanup
         - both
-      notification_webhook:
-        description: 'Slack 웹훅 URL (선택사항)'
+      telegram_notifications:
+        description: '텔레그램 알림 활성화 (선택사항)'
         required: false
-        default: ''
-        type: string
+        default: true
+        type: boolean
 
 jobs:
   update-jobs:
@@ -134,130 +134,64 @@ jobs:
         fi
 
     # 실패 알림 전송
-    - name: 🚨 에러 알림 전송 (Slack)
-      if: failure() && (secrets.SLACK_WEBHOOK_URL != '' || github.event.inputs.notification_webhook != '')
+    - name: 🚨 에러 알림 전송 (텔레그램)
+      if: failure() && (github.event.inputs.telegram_notifications != 'false')
+      env:
+        TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+        TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
       run: |
-        WEBHOOK_URL="${{ secrets.SLACK_WEBHOOK_URL }}"
-        if [ -n "${{ github.event.inputs.notification_webhook }}" ]; then
-          WEBHOOK_URL="${{ github.event.inputs.notification_webhook }}"
+        # 에러 상세 정보 수집
+        JOB_ERROR=""
+        CLEANUP_ERROR=""
+        
+        if [ "${{ steps.collect_jobs.outputs.job_collection_failed }}" = "true" ]; then
+          JOB_ERROR="• 신규 채용공고 수집 실패\n"
         fi
         
-        if [ -n "$WEBHOOK_URL" ]; then
-          # 에러 상세 정보 수집
-          JOB_ERROR=""
-          CLEANUP_ERROR=""
-          
-          if [ "${{ steps.collect_jobs.outputs.job_collection_failed }}" = "true" ]; then
-            JOB_ERROR="• 신규 채용공고 수집 실패\\n"
-          fi
-          
-          if [ "${{ steps.cleanup_jobs.outputs.cleanup_failed }}" = "true" ]; then
-            CLEANUP_ERROR="• 30일 경과 데이터 정리 실패\\n"
-          fi
-          
-          # Slack 메시지 전송
-          curl -X POST -H 'Content-type: application/json' \
-            --data "{
-              \"text\": \":warning: **채용정보 업데이트 실패 알림**\",
-              \"blocks\": [
-                {
-                  \"type\": \"header\",
-                  \"text\": {
-                    \"type\": \"plain_text\",
-                    \"text\": \"🚨 채용정보 시스템 오류 발생\"
-                  }
-                },
-                {
-                  \"type\": \"section\",
-                  \"fields\": [
-                    {
-                      \"type\": \"mrkdwn\",
-                      \"text\": \"*실행 시간:*\\n${{ steps.time.outputs.korea_time }}\"
-                    },
-                    {
-                      \"type\": \"mrkdwn\",
-                      \"text\": \"*실행 모드:*\\n${{ steps.mode.outputs.mode }}\"
-                    },
-                    {
-                      \"type\": \"mrkdwn\",
-                      \"text\": \"*트리거:*\\n${{ github.event_name }}\"
-                    },
-                    {
-                      \"type\": \"mrkdwn\",
-                      \"text\": \"*오류 내용:*\\n${JOB_ERROR}${CLEANUP_ERROR}\"
-                    }
-                  ]
-                },
-                {
-                  \"type\": \"section\",
-                  \"text\": {
-                    \"type\": \"mrkdwn\",
-                    \"text\": \":link: <https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|GitHub Actions 로그 확인>\"
-                  }
-                },
-                {
-                  \"type\": \"context\",
-                  \"elements\": [
-                    {
-                      \"type\": \"mrkdwn\",
-                      \"text\": \"📊 10분 간격 스케줄 (144회/일) | 🕐 UTC: ${{ steps.time.outputs.utc_time }}\"
-                    }
-                  ]
-                }
-              ]
-            }" \
-            "$WEBHOOK_URL"
-        else
-          echo "⚠️ 알림 웹훅 URL이 설정되지 않았습니다."
+        if [ "${{ steps.cleanup_jobs.outputs.cleanup_failed }}" = "true" ]; then
+          CLEANUP_ERROR="• 30일 경과 데이터 정리 실패\n"
         fi
+        
+        # 텔레그램 메시지 작성
+        MESSAGE="🚨 *채용정보 시스템 오류 발생*
+        
+📅 *실행 시간:* ${{ steps.time.outputs.korea_time }}
+🔧 *실행 모드:* ${{ steps.mode.outputs.mode }}
+🌐 *트리거:* ${{ github.event_name }}
+        
+❌ *오류 내용:*
+${JOB_ERROR}${CLEANUP_ERROR}
+        
+🔗 [GitHub Actions 로그 확인](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
+        
+📊 10분 간격 스케줄 (144회/일) | 🕐 UTC: ${{ steps.time.outputs.utc_time }}"
+        
+        # 텔레그램 메시지 전송
+        curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+          -d chat_id="${TELEGRAM_CHAT_ID}" \
+          -d text="${MESSAGE}" \
+          -d parse_mode="Markdown"
     
     # 성공 알림 전송 (매일 정리 작업 시만)
-    - name: 🎉 성공 알림 전송 (Slack)
-      if: success() && steps.mode.outputs.mode == 'cleanup' && (secrets.SLACK_WEBHOOK_URL != '' || github.event.inputs.notification_webhook != '')
+    - name: 🎉 성공 알림 전송 (텔레그램)
+      if: success() && steps.mode.outputs.mode == 'cleanup' && (github.event.inputs.telegram_notifications != 'false')
+      env:
+        TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+        TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
       run: |
-        WEBHOOK_URL="${{ secrets.SLACK_WEBHOOK_URL }}"
-        if [ -n "${{ github.event.inputs.notification_webhook }}" ]; then
-          WEBHOOK_URL="${{ github.event.inputs.notification_webhook }}"
-        fi
+        # 텔레그램 성공 메시지 작성
+        MESSAGE="🎉 *30일 경과 데이터 정리 완료*
         
-        if [ -n "$WEBHOOK_URL" ]; then
-          curl -X POST -H 'Content-type: application/json' \
-            --data "{
-              \"text\": \":white_check_mark: **일일 데이터 정리 완료**\",
-              \"blocks\": [
-                {
-                  \"type\": \"header\",
-                  \"text\": {
-                    \"type\": \"plain_text\",
-                    \"text\": \"🎉 30일 경과 데이터 정리 완료\"
-                  }
-                },
-                {
-                  \"type\": \"section\",
-                  \"fields\": [
-                    {
-                      \"type\": \"mrkdwn\",
-                      \"text\": \"*실행 시간:*\\n${{ steps.time.outputs.korea_time }}\"
-                    },
-                    {
-                      \"type\": \"mrkdwn\",
-                      \"text\": \"*소요 시간:*\\n${{ steps.cleanup_jobs.outputs.cleanup_duration }}초\"
-                    }
-                  ]
-                },
-                {
-                  \"type\": \"context\",
-                  \"elements\": [
-                    {
-                      \"type\": \"mrkdwn\",
-                      \"text\": \"🗑️ 정기 정리 완료 | 📊 시스템 정상 운영 중\"
-                    }
-                  ]
-                }
-              ]
-            }" \
-            "$WEBHOOK_URL"
-        fi
+📅 *실행 시간:* ${{ steps.time.outputs.korea_time }}
+⏱️ *소요 시간:* ${{ steps.cleanup_jobs.outputs.cleanup_duration }}초
+        
+🗑️ 정기 정리 완료 | 📊 시스템 정상 운영 중"
+        
+        # 텔레그램 메시지 전송
+        curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+          -d chat_id="${TELEGRAM_CHAT_ID}" \
+          -d text="${MESSAGE}" \
+          -d parse_mode="Markdown"
     
     # GitHub Issues를 통한 에러 리포팅 (선택사항)
     - name: 📝 GitHub Issue 생성 (심각한 오류 시)
@@ -336,47 +270,21 @@ jobs:
 
     # 주간 시스템 상태 보고 (일요일 자정에만)
     - name: 📈 주간 시스템 상태 보고
-      if: success() && steps.mode.outputs.mode == 'cleanup' && format('{0}', steps.time.outputs.korea_time) == 'Sun' && (secrets.SLACK_WEBHOOK_URL != '' || github.event.inputs.notification_webhook != '')
+      if: success() && steps.mode.outputs.mode == 'cleanup' && format('{0}', steps.time.outputs.korea_time) == 'Sun' && (github.event.inputs.telegram_notifications != 'false')
+      env:
+        TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+        TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
       run: |
-        WEBHOOK_URL="${{ secrets.SLACK_WEBHOOK_URL }}"
-        if [ -n "${{ github.event.inputs.notification_webhook }}" ]; then
-          WEBHOOK_URL="${{ github.event.inputs.notification_webhook }}"
-        fi
+        # 텔레그램 주간 보고 메시지 작성
+        MESSAGE="📈 *채용정보 시스템 주간 리포트*
         
-        if [ -n "$WEBHOOK_URL" ]; then
-          curl -X POST -H 'Content-type: application/json' \
-            --data "{
-              \"text\": \":chart_with_upwards_trend: **주간 시스템 상태 보고**\",
-              \"blocks\": [
-                {
-                  \"type\": \"header\",
-                  \"text\": {
-                    \"type\": \"plain_text\",
-                    \"text\": \"📈 채용정보 시스템 주간 리포트\"
-                  }
-                },
-                {
-                  \"type\": \"section\",
-                  \"fields\": [
-                    {
-                      \"type\": \"mrkdwn\",
-                      \"text\": \"*스케줄:*\\n10분 간격 (1,008회/주)\"
-                    },
-                    {
-                      \"type\": \"mrkdwn\",
-                      \"text\": \"*정리 작업:*\\n일일 1회 (7회/주)\"
-                    },
-                    {
-                      \"type\": \"mrkdwn\",
-                      \"text\": \"*시스템 상태:*\\n정상 운영\"
-                    },
-                    {
-                      \"type\": \"mrkdwn\",
-                      \"text\": \"*보고 시점:*\\n${{ steps.time.outputs.korea_time }}\"
-                    }
-                  ]
-                }
-              ]
-            }" \
-            "$WEBHOOK_URL"
-        fi
+📊 *스케줄:* 10분 간격 (1,008회/주)
+🗑️ *정리 작업:* 일일 1회 (7회/주)
+✅ *시스템 상태:* 정상 운영
+📅 *보고 시점:* ${{ steps.time.outputs.korea_time }}"
+        
+        # 텔레그램 메시지 전송
+        curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+          -d chat_id="${TELEGRAM_CHAT_ID}" \
+          -d text="${MESSAGE}" \
+          -d parse_mode="Markdown"
