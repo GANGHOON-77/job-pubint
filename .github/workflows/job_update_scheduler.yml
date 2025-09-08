@@ -1,9 +1,9 @@
-name: 🚀 채용정보 자동 업데이트 스케줄러
+name: 🚀 채용정보 자동 업데이트 스케줄러 (개선판)
 
 on:
   schedule:
-    # 매 5분마다 신규 채용공고 확인
-    - cron: '*/5 * * * *'
+    # 매 10분마다 신규 채용공고 확인 (비용 최적화: 288회/일 → 144회/일)
+    - cron: '*/10 * * * *'
     # 매일 새벽 0시 (KST) 30일 경과 채용공고 정리 (UTC 15시 = KST 0시)
     - cron: '0 15 * * *'
   
@@ -19,12 +19,27 @@ on:
         - new_jobs
         - cleanup
         - both
+      notification_webhook:
+        description: 'Slack 웹훅 URL (선택사항)'
+        required: false
+        default: ''
+        type: string
 
 jobs:
   update-jobs:
     name: 채용정보 업데이트
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 45  # 10분 간격으로 더 많은 데이터 처리 시간 확보
+    
+    # 실패 시 자동 재시도 설정
+    strategy:
+      fail-fast: false
+      matrix:
+        retry: [1]  # 단일 실행이지만 재시도 구조 준비
+    
+    # 환경변수 (전역 설정)
+    env:
+      TZ: 'Asia/Seoul'  # 한국 시간대 설정
 
     steps:
     - name: 📥 코드 체크아웃
@@ -35,32 +50,39 @@ jobs:
       with:
         python-version: '3.11'
 
-    - name: 📦 의존성 설치
+    - name: 📦 의존성 설치 (버전 고정)
       run: |
         python -m pip install --upgrade pip
-        pip install requests beautifulsoup4 firebase-admin pytz
+        pip install requests==2.31.0 beautifulsoup4==4.12.2 firebase-admin==6.2.0 pytz==2023.3
 
     - name: ⏰ 현재 시간 확인
       id: time
       run: |
         echo "current_time=$(date)" >> $GITHUB_OUTPUT
         echo "korea_time=$(TZ='Asia/Seoul' date)" >> $GITHUB_OUTPUT
+        echo "utc_time=$(date -u)" >> $GITHUB_OUTPUT
         echo "cron_minute=$(date +%M)" >> $GITHUB_OUTPUT
 
-    - name: 🔍 실행 모드 결정
+    - name: 🔍 실행 모드 결정 (UTC 시간 기준 개선)
       id: mode
       run: |
+        CURRENT_UTC_HOUR=$(date -u +%H)
+        CURRENT_UTC_MINUTE=$(date -u +%M)
+        
         if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
           MODE="${{ github.event.inputs.mode }}"
-        elif [ "$(date +%H:%M)" = "15:00" ]; then
+        elif [ "$CURRENT_UTC_HOUR" = "15" ] && [ "$CURRENT_UTC_MINUTE" = "00" ]; then
           MODE="cleanup"
         else
           MODE="new_jobs"
         fi
         echo "mode=$MODE" >> $GITHUB_OUTPUT
         echo "선택된 실행 모드: $MODE"
+        echo "UTC 시간: $(date -u)"
+        echo "KST 시간: $(TZ='Asia/Seoul' date)"
 
     - name: 🆕 신규 채용공고 수집
+      id: collect_jobs
       if: steps.mode.outputs.mode == 'new_jobs' || steps.mode.outputs.mode == 'both'
       env:
         FIREBASE_CREDENTIALS: ${{ secrets.FIREBASE_CREDENTIALS }}
@@ -69,9 +91,24 @@ jobs:
       run: |
         echo "🔍 신규 채용공고 확인 시작..."
         echo "현재 시각: ${{ steps.time.outputs.korea_time }}"
-        python auto_update_jobs.py
+        
+        # 에러 체크를 위한 실행 시간 추적
+        START_TIME=$(date +%s)
+        
+        if ! python auto_update_jobs.py; then
+          echo "job_collection_failed=true" >> $GITHUB_OUTPUT
+          echo "job_collection_error=신규 채용공고 수집 실패" >> $GITHUB_OUTPUT
+          exit 1
+        else
+          echo "job_collection_failed=false" >> $GITHUB_OUTPUT
+          END_TIME=$(date +%s)
+          DURATION=$((END_TIME - START_TIME))
+          echo "job_collection_duration=${DURATION}" >> $GITHUB_OUTPUT
+          echo "✅ 신규 채용공고 수집 완료 (${DURATION}초 소요)"
+        fi
 
     - name: 🗑️ 30일 경과 채용공고 정리
+      id: cleanup_jobs
       if: steps.mode.outputs.mode == 'cleanup' || steps.mode.outputs.mode == 'both'
       env:
         FIREBASE_CREDENTIALS: ${{ secrets.FIREBASE_CREDENTIALS }}
@@ -80,14 +117,266 @@ jobs:
       run: |
         echo "🗑️ 30일 경과 채용공고 정리 시작..."
         echo "현재 시각: ${{ steps.time.outputs.korea_time }}"
-        python auto_update_jobs.py
+        
+        # 에러 체크를 위한 실행 시간 추적
+        START_TIME=$(date +%s)
+        
+        if ! python auto_update_jobs.py; then
+          echo "cleanup_failed=true" >> $GITHUB_OUTPUT
+          echo "cleanup_error=30일 경과 데이터 정리 실패" >> $GITHUB_OUTPUT
+          exit 1
+        else
+          echo "cleanup_failed=false" >> $GITHUB_OUTPUT
+          END_TIME=$(date +%s)
+          DURATION=$((END_TIME - START_TIME))
+          echo "cleanup_duration=${DURATION}" >> $GITHUB_OUTPUT
+          echo "✅ 30일 경과 데이터 정리 완료 (${DURATION}초 소요)"
+        fi
 
+    # 실패 알림 전송
+    - name: 🚨 에러 알림 전송 (Slack)
+      if: failure() && (secrets.SLACK_WEBHOOK_URL != '' || github.event.inputs.notification_webhook != '')
+      run: |
+        WEBHOOK_URL="${{ secrets.SLACK_WEBHOOK_URL }}"
+        if [ -n "${{ github.event.inputs.notification_webhook }}" ]; then
+          WEBHOOK_URL="${{ github.event.inputs.notification_webhook }}"
+        fi
+        
+        if [ -n "$WEBHOOK_URL" ]; then
+          # 에러 상세 정보 수집
+          JOB_ERROR=""
+          CLEANUP_ERROR=""
+          
+          if [ "${{ steps.collect_jobs.outputs.job_collection_failed }}" = "true" ]; then
+            JOB_ERROR="• 신규 채용공고 수집 실패\\n"
+          fi
+          
+          if [ "${{ steps.cleanup_jobs.outputs.cleanup_failed }}" = "true" ]; then
+            CLEANUP_ERROR="• 30일 경과 데이터 정리 실패\\n"
+          fi
+          
+          # Slack 메시지 전송
+          curl -X POST -H 'Content-type: application/json' \
+            --data "{
+              \"text\": \":warning: **채용정보 업데이트 실패 알림**\",
+              \"blocks\": [
+                {
+                  \"type\": \"header\",
+                  \"text\": {
+                    \"type\": \"plain_text\",
+                    \"text\": \"🚨 채용정보 시스템 오류 발생\"
+                  }
+                },
+                {
+                  \"type\": \"section\",
+                  \"fields\": [
+                    {
+                      \"type\": \"mrkdwn\",
+                      \"text\": \"*실행 시간:*\\n${{ steps.time.outputs.korea_time }}\"
+                    },
+                    {
+                      \"type\": \"mrkdwn\",
+                      \"text\": \"*실행 모드:*\\n${{ steps.mode.outputs.mode }}\"
+                    },
+                    {
+                      \"type\": \"mrkdwn\",
+                      \"text\": \"*트리거:*\\n${{ github.event_name }}\"
+                    },
+                    {
+                      \"type\": \"mrkdwn\",
+                      \"text\": \"*오류 내용:*\\n${JOB_ERROR}${CLEANUP_ERROR}\"
+                    }
+                  ]
+                },
+                {
+                  \"type\": \"section\",
+                  \"text\": {
+                    \"type\": \"mrkdwn\",
+                    \"text\": \":link: <https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|GitHub Actions 로그 확인>\"
+                  }
+                },
+                {
+                  \"type\": \"context\",
+                  \"elements\": [
+                    {
+                      \"type\": \"mrkdwn\",
+                      \"text\": \"📊 10분 간격 스케줄 (144회/일) | 🕐 UTC: ${{ steps.time.outputs.utc_time }}\"
+                    }
+                  ]
+                }
+              ]
+            }" \
+            "$WEBHOOK_URL"
+        else
+          echo "⚠️ 알림 웹훅 URL이 설정되지 않았습니다."
+        fi
+    
+    # 성공 알림 전송 (매일 정리 작업 시만)
+    - name: 🎉 성공 알림 전송 (Slack)
+      if: success() && steps.mode.outputs.mode == 'cleanup' && (secrets.SLACK_WEBHOOK_URL != '' || github.event.inputs.notification_webhook != '')
+      run: |
+        WEBHOOK_URL="${{ secrets.SLACK_WEBHOOK_URL }}"
+        if [ -n "${{ github.event.inputs.notification_webhook }}" ]; then
+          WEBHOOK_URL="${{ github.event.inputs.notification_webhook }}"
+        fi
+        
+        if [ -n "$WEBHOOK_URL" ]; then
+          curl -X POST -H 'Content-type: application/json' \
+            --data "{
+              \"text\": \":white_check_mark: **일일 데이터 정리 완료**\",
+              \"blocks\": [
+                {
+                  \"type\": \"header\",
+                  \"text\": {
+                    \"type\": \"plain_text\",
+                    \"text\": \"🎉 30일 경과 데이터 정리 완료\"
+                  }
+                },
+                {
+                  \"type\": \"section\",
+                  \"fields\": [
+                    {
+                      \"type\": \"mrkdwn\",
+                      \"text\": \"*실행 시간:*\\n${{ steps.time.outputs.korea_time }}\"
+                    },
+                    {
+                      \"type\": \"mrkdwn\",
+                      \"text\": \"*소요 시간:*\\n${{ steps.cleanup_jobs.outputs.cleanup_duration }}초\"
+                    }
+                  ]
+                },
+                {
+                  \"type\": \"context\",
+                  \"elements\": [
+                    {
+                      \"type\": \"mrkdwn\",
+                      \"text\": \"🗑️ 정기 정리 완료 | 📊 시스템 정상 운영 중\"
+                    }
+                  ]
+                }
+              ]
+            }" \
+            "$WEBHOOK_URL"
+        fi
+    
+    # GitHub Issues를 통한 에러 리포팅 (선택사항)
+    - name: 📝 GitHub Issue 생성 (심각한 오류 시)
+      if: failure() && (steps.collect_jobs.outputs.job_collection_failed == 'true' || steps.cleanup_jobs.outputs.cleanup_failed == 'true')
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const title = `🚨 채용정보 시스템 오류 - ${new Date().toLocaleString('ko-KR', {timeZone: 'Asia/Seoul'})}`;
+          
+          let errorDetails = '';
+          if ('${{ steps.collect_jobs.outputs.job_collection_failed }}' === 'true') {
+            errorDetails += '- ❌ 신규 채용공고 수집 실패\n';
+          }
+          if ('${{ steps.cleanup_jobs.outputs.cleanup_failed }}' === 'true') {
+            errorDetails += '- ❌ 30일 경과 데이터 정리 실패\n';
+          }
+          
+          const body = `
+          ## 오류 상세 정보
+          
+          ${errorDetails}
+          
+          **실행 정보:**
+          - 🕐 실행 시간: ${{ steps.time.outputs.korea_time }}
+          - 🔧 실행 모드: ${{ steps.mode.outputs.mode }}
+          - 🌐 트리거: ${{ github.event_name }}
+          - 🔗 실행 로그: [GitHub Actions](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+          
+          **시스템 정보:**
+          - 📊 스케줄: 10분 간격 (144회/일)
+          - 🕐 UTC 시간: ${{ steps.time.outputs.utc_time }}
+          - 🇰🇷 KST 시간: ${{ steps.time.outputs.korea_time }}
+          
+          ---
+          *이 이슈는 자동으로 생성되었습니다. 문제 해결 후 수동으로 닫아주세요.*
+          `;
+          
+          github.rest.issues.create({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            title: title,
+            body: body,
+            labels: ['bug', 'automation', 'urgent']
+          });
+    
+    # 결과 요약 (항상 실행)
     - name: 📊 결과 요약
       if: always()
       run: |
-        echo "========================================"
+        echo "=========================================="
         echo "🎯 채용정보 자동 업데이트 완료"
         echo "📅 실행 일시: ${{ steps.time.outputs.korea_time }}"
         echo "🔧 실행 모드: ${{ steps.mode.outputs.mode }}"
         echo "🌐 트리거: ${{ github.event_name }}"
-        echo "========================================"
+        echo "🔄 10분 간격 스케줄 (144회/일)"
+        echo ""
+        
+        # 실행 결과 상세
+        if [ "${{ steps.collect_jobs.outputs.job_collection_failed }}" = "true" ]; then
+          echo "❌ 신규 채용공고 수집: 실패"
+        elif [ "${{ steps.mode.outputs.mode }}" = "new_jobs" ] || [ "${{ steps.mode.outputs.mode }}" = "both" ]; then
+          echo "✅ 신규 채용공고 수집: 성공 (${{ steps.collect_jobs.outputs.job_collection_duration }}초)"
+        fi
+        
+        if [ "${{ steps.cleanup_jobs.outputs.cleanup_failed }}" = "true" ]; then
+          echo "❌ 데이터 정리: 실패"
+        elif [ "${{ steps.mode.outputs.mode }}" = "cleanup" ] || [ "${{ steps.mode.outputs.mode }}" = "both" ]; then
+          echo "✅ 데이터 정리: 성공 (${{ steps.cleanup_jobs.outputs.cleanup_duration }}초)"
+        fi
+        
+        echo ""
+        echo "💰 예상 월간 비용: ~2,160분 (144회/일 × 30일 × 0.5분)"
+        echo "🎯 GitHub Actions 무료 한도: 2,000분/월"
+        echo "⚠️  월말 사용량 모니터링 필요"
+        echo "=========================================="
+
+    # 주간 시스템 상태 보고 (일요일 자정에만)
+    - name: 📈 주간 시스템 상태 보고
+      if: success() && steps.mode.outputs.mode == 'cleanup' && format('{0}', steps.time.outputs.korea_time) == 'Sun' && (secrets.SLACK_WEBHOOK_URL != '' || github.event.inputs.notification_webhook != '')
+      run: |
+        WEBHOOK_URL="${{ secrets.SLACK_WEBHOOK_URL }}"
+        if [ -n "${{ github.event.inputs.notification_webhook }}" ]; then
+          WEBHOOK_URL="${{ github.event.inputs.notification_webhook }}"
+        fi
+        
+        if [ -n "$WEBHOOK_URL" ]; then
+          curl -X POST -H 'Content-type: application/json' \
+            --data "{
+              \"text\": \":chart_with_upwards_trend: **주간 시스템 상태 보고**\",
+              \"blocks\": [
+                {
+                  \"type\": \"header\",
+                  \"text\": {
+                    \"type\": \"plain_text\",
+                    \"text\": \"📈 채용정보 시스템 주간 리포트\"
+                  }
+                },
+                {
+                  \"type\": \"section\",
+                  \"fields\": [
+                    {
+                      \"type\": \"mrkdwn\",
+                      \"text\": \"*스케줄:*\\n10분 간격 (1,008회/주)\"
+                    },
+                    {
+                      \"type\": \"mrkdwn\",
+                      \"text\": \"*정리 작업:*\\n일일 1회 (7회/주)\"
+                    },
+                    {
+                      \"type\": \"mrkdwn\",
+                      \"text\": \"*시스템 상태:*\\n정상 운영\"
+                    },
+                    {
+                      \"type\": \"mrkdwn\",
+                      \"text\": \"*보고 시점:*\\n${{ steps.time.outputs.korea_time }}\"
+                    }
+                  ]
+                }
+              ]
+            }" \
+            "$WEBHOOK_URL"
+        fi
