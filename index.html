@@ -1576,6 +1576,305 @@
                 font-weight: bold;
             }
         }
+        
+        /* 별도 상세 페이지 스타일 (구글봇용) */
+        .job-detail-page {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px 0;
+        }
+
+        .job-detail-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .breadcrumb {
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 14px;
+        }
+
+        .breadcrumb-link {
+            color: rgba(255, 255, 255, 0.9);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .breadcrumb-link:hover {
+            color: white;
+        }
+
+        .breadcrumb-separator {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .breadcrumb-current {
+            color: white;
+        }
+
+        .job-detail-content {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+        }
+
+        .job-detail-header {
+            background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
+            padding: 40px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .job-detail-title {
+            font-size: 32px;
+            font-weight: 700;
+            color: #1a202c;
+            margin-bottom: 20px;
+            line-height: 1.3;
+        }
+
+        .job-detail-meta {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            background: linear-gradient(145deg, #f7fafc, #edf2f7);
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+
+        .meta-label {
+            font-weight: 600;
+            color: #4a5568;
+            min-width: 80px;
+        }
+
+        .meta-value {
+            color: #2d3748;
+            font-weight: 500;
+        }
+
+        .job-detail-body {
+            padding: 40px;
+        }
+
+        .detail-section {
+            margin-bottom: 30px;
+            padding: 25px;
+            background: linear-gradient(145deg, #f8fafc, #f1f5f9);
+            border-radius: 15px;
+            border-left: 5px solid #667eea;
+        }
+
+        .detail-section h2 {
+            font-size: 20px;
+            font-weight: 700;
+            color: #2d3748;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .detail-section h2::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            background: #667eea;
+            border-radius: 50%;
+        }
+
+        .detail-section p,
+        .detail-section div {
+            color: #4a5568;
+            line-height: 1.8;
+            font-size: 16px;
+        }
+
+        .job-attachments-section {
+            padding: 40px;
+            background: linear-gradient(145deg, #f7fafc, #edf2f7);
+        }
+
+        .job-attachments-section h2 {
+            font-size: 24px;
+            font-weight: 700;
+            color: #2d3748;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .job-attachments-section h2::before {
+            content: '📎';
+            font-size: 24px;
+        }
+
+        .attachments-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .attachment-item {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e2e8f0;
+            transition: all 0.3s ease;
+        }
+
+        .attachment-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.15);
+        }
+
+        .attachment-title {
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 8px;
+            font-size: 16px;
+        }
+
+        .attachment-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 8px 16px;
+            background: linear-gradient(145deg, #f0f4ff, #e6effb);
+            border-radius: 8px;
+            border: 1px solid rgba(102, 126, 234, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .attachment-link:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-1px);
+        }
+
+        .attachment-unavailable {
+            color: #718096;
+            font-style: italic;
+            padding: 8px 16px;
+            background: #f7fafc;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .job-detail-footer {
+            padding: 30px 40px;
+            background: linear-gradient(145deg, #667eea, #764ba2);
+            text-align: center;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-weight: 600;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: white;
+            color: #667eea;
+            box-shadow: 0 4px 15px rgba(255, 255, 255, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 255, 255, 0.4);
+            color: #5a67d8;
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        /* 반응형 디자인 */
+        @media (max-width: 768px) {
+            .job-detail-container {
+                padding: 0 15px;
+            }
+            
+            .job-detail-header,
+            .job-detail-body,
+            .job-attachments-section {
+                padding: 25px 20px;
+            }
+
+            .job-detail-title {
+                font-size: 24px;
+            }
+
+            .job-detail-meta {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            .meta-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+
+            .meta-label {
+                min-width: auto;
+                font-size: 14px;
+            }
+
+            .attachments-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .btn {
+                justify-content: center;
+            }
+        }
+
     </style>
 </head>
 <body>
@@ -1738,6 +2037,86 @@
                     <!-- 상세 내용이 여기에 동적으로 삽입됩니다 -->
                 </div>
             </div>
+        </div>
+    </div>
+
+    <!-- 별도 상세 페이지 (구글봇용) -->
+    <div id="jobDetailPage" class="job-detail-page" style="display: none;">
+        <div class="job-detail-container">
+            <nav class="breadcrumb">
+                <a href="/" class="breadcrumb-link">홈</a>
+                <span class="breadcrumb-separator">›</span>
+                <span class="breadcrumb-current">채용공고</span>
+            </nav>
+            
+            <article class="job-detail-content">
+                <header class="job-detail-header">
+                    <h1 id="detailTitle" class="job-detail-title"></h1>
+                    <div class="job-detail-meta">
+                        <div class="meta-item">
+                            <span class="meta-label">기관명</span>
+                            <span id="detailDeptName" class="meta-value"></span>
+                        </div>
+                        <div class="meta-item">
+                            <span class="meta-label">근무지역</span>
+                            <span id="detailWorkRegion" class="meta-value"></span>
+                        </div>
+                        <div class="meta-item">
+                            <span class="meta-label">고용형태</span>
+                            <span id="detailEmploymentType" class="meta-value"></span>
+                        </div>
+                        <div class="meta-item">
+                            <span class="meta-label">모집인원</span>
+                            <span id="detailRecruitNum" class="meta-value"></span>
+                        </div>
+                        <div class="meta-item">
+                            <span class="meta-label">접수기간</span>
+                            <span id="detailPeriod" class="meta-value"></span>
+                        </div>
+                    </div>
+                </header>
+
+                <section class="job-detail-body">
+                    <div class="detail-section">
+                        <h2>모집분야</h2>
+                        <p id="detailWorkField"></p>
+                    </div>
+                    
+                    <div class="detail-section">
+                        <h2>학력요구사항</h2>
+                        <p id="detailEducation"></p>
+                    </div>
+                    
+                    <div class="detail-section">
+                        <h2>우대조건</h2>
+                        <p id="detailPreference"></p>
+                    </div>
+                    
+                    <div class="detail-section">
+                        <h2>급여정보</h2>
+                        <p id="detailSalary"></p>
+                    </div>
+
+                    <div class="detail-section" id="detailContentSection" style="display: none;">
+                        <h2>상세내용</h2>
+                        <div id="detailContent"></div>
+                    </div>
+                </section>
+
+                <section class="job-attachments-section">
+                    <h2>첨부파일</h2>
+                    <div id="detailAttachments" class="attachments-grid"></div>
+                </section>
+
+                <footer class="job-detail-footer">
+                    <div class="action-buttons">
+                        <a id="detailSrcUrl" href="#" target="_blank" rel="noopener" class="btn btn-primary">
+                            원본 페이지에서 지원하기
+                        </a>
+                        <button onclick="history.back()" class="btn btn-secondary">목록으로</button>
+                    </div>
+                </footer>
+            </article>
         </div>
     </div>
 
@@ -2066,10 +2445,209 @@
             return html;
         }
 
-        // 상세보기 모달 표시
-        function showJobDetail(jobIdx) {
-            const job = allJobs.find(j => j.idx === jobIdx);
+        // URL 라우팅 및 이중구조 지원 시스템
+        let isGoogleBot = false;
+        let currentJobId = null;
+
+        // 구글봇 감지 함수
+        function detectGoogleBot() {
+            const userAgent = navigator.userAgent.toLowerCase();
+            return userAgent.includes('googlebot') || 
+                   userAgent.includes('google') ||
+                   userAgent.includes('crawler') ||
+                   userAgent.includes('bot');
+        }
+
+        // URL 라우팅 초기화
+        function initializeRouting() {
+            isGoogleBot = detectGoogleBot();
+            console.log('구글봇 감지:', isGoogleBot);
+            
+            // 페이지 로드 시 URL 확인
+            const path = window.location.pathname;
+            const jobIdMatch = path.match(/^\/jobs\/(.+)$/);
+            
+            if (jobIdMatch) {
+                const jobId = jobIdMatch[1];
+                currentJobId = jobId;
+                console.log('URL에서 채용공고 ID 발견:', jobId);
+                
+                // 데이터 로드 후 표시하도록 지연
+                // 여기서는 URL만 기록하고, 실제 표시는 loadJobs 완료 후에 수행
+                return true;
+            }
+            
+            // 홈페이지면 메인 컨테이너 표시 (데이터 로드와 무관하게)
+            document.getElementById('mainContainer').style.display = 'block';
+            document.getElementById('jobDetailPage').style.display = 'none';
+            return false;
+        }
+
+        // 메인 페이지 표시
+        function showMainPage() {
+            document.getElementById('mainContainer').style.display = 'block';
+            document.getElementById('jobDetailPage').style.display = 'none';
+            updateMetaTags('홈', '공공기관 채용정보 통합 검색 시스템 - 실시간 채용공고 검색 및 지원');
+        }
+
+        // 상세 페이지 표시 (SEO용)
+        function showJobDetailPage(jobIdx) {
+            const job = allJobs.find(j => j.idx === jobIdx) || findJobInCache(jobIdx);
+            if (!job) {
+                // 데이터가 없으면 로드 후 재시도
+                loadJobById(jobIdx).then(loadedJob => {
+                    if (loadedJob) {
+                        renderJobDetailPage(loadedJob);
+                    } else {
+                        show404Page();
+                    }
+                });
+                return;
+            }
+            
+            renderJobDetailPage(job);
+        }
+
+        // 상세 페이지 렌더링
+        function renderJobDetailPage(job) {
+            document.getElementById('mainContainer').style.display = 'none';
+            document.getElementById('jobDetailPage').style.display = 'block';
+            
+            // 상세 페이지 내용 업데이트
+            document.getElementById('detailTitle').textContent = job.title;
+            document.getElementById('detailDeptName').textContent = job.dept_name || '기관명 없음';
+            document.getElementById('detailWorkRegion').textContent = job.work_region || '지역 정보 없음';
+            document.getElementById('detailEmploymentType').textContent = job.employment_type || '고용형태 정보 없음';
+            document.getElementById('detailRecruitNum').textContent = `${job.recruit_num || 1}명`;
+            document.getElementById('detailRecruitType').textContent = job.recruit_type || '채용구분 정보 없음';
+            document.getElementById('detailRegDate').textContent = formatDate(job.reg_date);
+            document.getElementById('detailEndDate').textContent = formatDate(job.end_date);
+            
+            // 상세 내용 표시
+            const detailContent = document.getElementById('detailContent');
+            if (job.detail_content && job.detail_content.trim()) {
+                document.getElementById('detailContentSection').style.display = 'block';
+                detailContent.innerHTML = formatDetailContent(job);
+            } else {
+                document.getElementById('detailContentSection').style.display = 'none';
+            }
+            
+            // 첨부파일 렌더링
+            document.getElementById('detailAttachments').innerHTML = renderAttachments(job);
+            
+            // 원본 링크 설정
+            const srcUrl = job.src_url || `https://www.alio.go.kr/informationResources/recruitment/recruitmentView.do?seq=${job.idx}`;
+            document.getElementById('detailSrcUrl').href = srcUrl;
+            
+            // SEO 메타태그 업데이트
+            updateMetaTags(job.title, `${job.dept_name} - ${job.title} | 채용공고 상세정보`, job.idx);
+            
+            // 스크롤 최상단으로
+            window.scrollTo(0, 0);
+        }
+
+        // SEO 메타태그 동적 업데이트
+        function updateMetaTags(title, description, jobId = null) {
+            // 페이지 제목
+            document.title = title + ' | 공공기관 채용정보';
+            
+            // 메타 description
+            let metaDesc = document.querySelector('meta[name="description"]');
+            if (!metaDesc) {
+                metaDesc = document.createElement('meta');
+                metaDesc.name = 'description';
+                document.head.appendChild(metaDesc);
+            }
+            metaDesc.content = description;
+            
+            // Open Graph 태그들
+            const ogTitle = document.querySelector('meta[property="og:title"]') || createMetaTag('og:title', 'property');
+            ogTitle.content = title;
+            
+            const ogDesc = document.querySelector('meta[property="og:description"]') || createMetaTag('og:description', 'property');
+            ogDesc.content = description;
+            
+            const ogUrl = document.querySelector('meta[property="og:url"]') || createMetaTag('og:url', 'property');
+            ogUrl.content = jobId ? `${window.location.origin}/jobs/${jobId}` : window.location.href;
+            
+            // 구조화된 데이터 업데이트 (JSON-LD)
+            if (jobId) {
+                updateStructuredData(allJobs.find(j => j.idx === jobId));
+            }
+        }
+
+        // 메타태그 생성 헬퍼
+        function createMetaTag(name, type = 'name') {
+            const meta = document.createElement('meta');
+            meta.setAttribute(type, name);
+            document.head.appendChild(meta);
+            return meta;
+        }
+
+        // 구조화된 데이터 업데이트
+        function updateStructuredData(job) {
             if (!job) return;
+            
+            let structuredDataScript = document.getElementById('structured-data');
+            if (!structuredDataScript) {
+                structuredDataScript = document.createElement('script');
+                structuredDataScript.id = 'structured-data';
+                structuredDataScript.type = 'application/ld+json';
+                document.head.appendChild(structuredDataScript);
+            }
+            
+            const structuredData = {
+                "@context": "https://schema.org/",
+                "@type": "JobPosting",
+                "title": job.title,
+                "description": job.detail_content || job.title,
+                "hiringOrganization": {
+                    "@type": "Organization",
+                    "name": job.dept_name
+                },
+                "jobLocation": {
+                    "@type": "Place",
+                    "addressLocality": job.work_region
+                },
+                "employmentType": job.employment_type,
+                "datePosted": job.reg_date,
+                "validThrough": job.end_date,
+                "identifier": {
+                    "@type": "PropertyValue",
+                    "name": "공고번호",
+                    "value": job.idx
+                }
+            };
+            
+            structuredDataScript.textContent = JSON.stringify(structuredData);
+        }
+
+        // 상세보기 모달 표시 (기존 기능 완전 복원)
+        function showJobDetail(jobIdx, skipUrlUpdate = false) {
+            const job = allJobs.find(j => j.idx === jobIdx);
+            if (!job) {
+                console.error('채용공고를 찾을 수 없음:', jobIdx);
+                return;
+            }
+            
+            console.log('상세보기 모달 표시:', jobIdx, job.title);
+            
+            // 구글봇인 경우에만 상세 페이지로 리다이렉트
+            if (isGoogleBot) {
+                showJobDetailPage(jobIdx);
+                return;
+            }
+            
+            // URL 업데이트 (에러 방지를 위해 try-catch 추가)
+            if (!skipUrlUpdate) {
+                try {
+                    const newUrl = `/jobs/${jobIdx}`;
+                    history.pushState({ jobId: jobIdx, modal: true }, job.title, newUrl);
+                    currentJobId = jobIdx;
+                } catch (error) {
+                    console.warn('URL 업데이트 실패 (무시됨):', error);
+                }
+            }
             
             const modal = document.getElementById('jobModal');
             const modalTitle = document.getElementById('modalTitle');
@@ -2498,10 +3076,119 @@
             element.classList.toggle('expanded');
         }
         
-        // 페이지 로드시 자동으로 데이터 불러오기
+        // 헬퍼 함수들 추가
+        
+        // ID로 개별 작업 로드 (캐시 또는 Firebase에서)
+        async function loadJobById(jobIdx) {
+            // 먼저 allJobs에서 찾기
+            let job = allJobs.find(j => j.idx === jobIdx);
+            if (job) return job;
+            
+            try {
+                // Firebase에서 개별 로드
+                const response = await fetch(`https://us-central1-job-pubint.cloudfunctions.net/manualJobUpdate?mode=job&id=${jobIdx}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.job) {
+                        return data.job;
+                    }
+                }
+            } catch (error) {
+                console.error('개별 작업 로드 실패:', error);
+            }
+            
+            return null;
+        }
+
+        // 캐시에서 작업 찾기
+        function findJobInCache(jobIdx) {
+            return allJobs.find(j => j.idx === jobIdx) || null;
+        }
+
+        // 404 페이지 표시
+        function show404Page() {
+            document.getElementById('mainContainer').style.display = 'none';
+            document.getElementById('jobDetailPage').style.display = 'block';
+            
+            document.getElementById('detailTitle').textContent = '채용공고를 찾을 수 없습니다';
+            document.getElementById('jobDetailPage').innerHTML = `
+                <div style="text-align: center; padding: 60px 20px;">
+                    <div style="font-size: 72px; margin-bottom: 24px;">😔</div>
+                    <h1 style="margin-bottom: 16px;">채용공고를 찾을 수 없습니다</h1>
+                    <p style="color: #666; margin-bottom: 32px;">요청하신 채용공고가 존재하지 않거나 만료되었을 수 있습니다.</p>
+                    <button onclick="goHome()" style="padding: 12px 24px; background: #667eea; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 16px;">
+                        🏠 홈으로 돌아가기
+                    </button>
+                </div>
+            `;
+        }
+
+        // 홈으로 이동
+        function goHome() {
+            history.pushState({}, '홈', '/');
+            showMainPage();
+        }
+
+        // 브라우저 뒤로/앞으로 버튼 처리 (간소화)
+        window.addEventListener('popstate', function(event) {
+            try {
+                if (event.state && event.state.jobId && allJobs.length > 0) {
+                    const job = allJobs.find(j => j.idx === event.state.jobId);
+                    if (job) {
+                        if (event.state.modal) {
+                            showJobDetail(event.state.jobId, true);
+                        } else if (isGoogleBot) {
+                            showJobDetailPage(event.state.jobId);
+                        } else {
+                            showJobDetail(event.state.jobId, true);
+                        }
+                    }
+                } else {
+                    // 홈페이지로
+                    closeModal();
+                    showMainPage();
+                }
+            } catch (error) {
+                console.warn('브라우저 히스토리 처리 실패:', error);
+                closeModal();
+            }
+        });
+
+        // 모달 바깥 클릭시 닫기 (기존 동작)
+        window.addEventListener('click', function(event) {
+            const modal = document.getElementById('jobModal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        });
+
+        // 모달 닫기 (기존 기능 그대로)
+        function closeModal() {
+            document.getElementById('jobModal').style.display = 'none';
+            
+            // URL 정리 (에러 방지)
+            try {
+                if (currentJobId && window.location.pathname !== '/') {
+                    history.pushState({}, '홈', '/');
+                    currentJobId = null;
+                }
+            } catch (error) {
+                console.warn('URL 정리 실패 (무시됨):', error);
+            }
+        }
+
+        // 페이지 로드시 자동으로 데이터 불러오기 (기존 방식 완전 복원)
         window.addEventListener('DOMContentLoaded', function() {
+            console.log('페이지 초기화 시작');
+            
+            // 라우팅 관련 변수만 초기화 (실제 라우팅은 나중에)
+            isGoogleBot = detectGoogleBot();
+            
+            // 기존과 동일한 초기화
             initializeFilters();
-            loadJobs();
+            loadJobs(); // 자동 로딩
+            
+            console.log('기존 방식으로 자동 데이터 로딩 시작');
         });
     </script>
 </body>
