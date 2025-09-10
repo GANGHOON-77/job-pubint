@@ -26,7 +26,9 @@ jobs:
         
     - name: Create Firebase key file
       run: |
-        echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT_KEY }}' > firebase-key.json
+        cat << 'EOF' > firebase-key.json
+        ${{ secrets.FIREBASE_SERVICE_ACCOUNT_KEY }}
+        EOF
       env:
         FIREBASE_SERVICE_ACCOUNT_KEY: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_KEY }}
         
@@ -39,4 +41,5 @@ jobs:
         
     - name: Clean up
       run: |
+
         rm -f firebase-key.json
