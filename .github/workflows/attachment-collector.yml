@@ -27,10 +27,8 @@ jobs:
     - name: Create Firebase key file
       run: |
         cat << 'EOF' > firebase-key.json
-        ${{ secrets.FIREBASE_SERVICE_ACCOUNT_KEY }}
+        ${{ secrets.FIREBASE_CREDENTIALS }}
         EOF
-      env:
-        FIREBASE_SERVICE_ACCOUNT_KEY: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_KEY }}
         
     - name: Run attachment collector
       run: |
@@ -41,5 +39,4 @@ jobs:
         
     - name: Clean up
       run: |
-
         rm -f firebase-key.json
