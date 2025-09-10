@@ -1,0 +1,42 @@
+name: Attachment Collector
+
+on:
+  schedule:
+    # 매시간 실행 (UTC 기준)
+    - cron: '0 * * * *'
+  workflow_dispatch: # 수동 실행 가능
+
+jobs:
+  collect-attachments:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install requests beautifulsoup4 firebase-admin pytz
+        
+    - name: Create Firebase key file
+      run: |
+        echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT_KEY }}' > firebase-key.json
+      env:
+        FIREBASE_SERVICE_ACCOUNT_KEY: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_KEY }}
+        
+    - name: Run attachment collector
+      run: |
+        python attachment_collector.py
+      env:
+        FIREBASE_KEY_PATH: firebase-key.json
+        TZ: Asia/Seoul
+        
+    - name: Clean up
+      run: |
+        rm -f firebase-key.json
