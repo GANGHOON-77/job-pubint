@@ -2611,7 +2611,21 @@
                 },
                 "jobLocation": {
                     "@type": "Place",
-                    "addressLocality": job.work_region
+                    "address": {
+                        "@type": "PostalAddress",
+                        "addressLocality": job.work_region || "대한민국",
+                        "addressRegion": job.work_region || "전국",
+                        "addressCountry": "KR"
+                    }
+                },
+                "baseSalary": {
+                    "@type": "MonetaryAmount",
+                    "currency": "KRW",
+                    "value": {
+                        "@type": "QuantitativeValue",
+                        "value": job.salary || "면접 후 결정",
+                        "unitText": "YEAR"
+                    }
                 },
                 "employmentType": job.employment_type,
                 "datePosted": job.reg_date,
