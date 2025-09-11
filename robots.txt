@@ -1,58 +1,13 @@
-# robots.txt for https://public-job.co.kr
-# 공공기관 채용정보 통합 검색 시스템
-
-# 모든 검색엔진 봇 허용
 User-agent: *
 Allow: /
-Crawl-delay: 1
+Allow: /about.html
+Disallow: /jobs/
+Disallow: /backup/
+Disallow: /*.backup.html
 
-# Google 봇 우선 처리
-User-agent: Googlebot
-Allow: /
-Allow: /jobs/
-Crawl-delay: 0
-
-# 구글 이미지 봇
-User-agent: Googlebot-Image
+# Google AdSense
+User-agent: Mediapartners-Google
 Allow: /
 
-# 네이버 봇
-User-agent: Yeti
-Allow: /
-Crawl-delay: 1
-
-# 다음 봇
-User-agent: Daum
-Allow: /
-Crawl-delay: 1
-
-# 빙 봇
-User-agent: Bingbot
-Allow: /
-Crawl-delay: 1
-
-# 사이트맵 위치
+# Sitemap
 Sitemap: https://public-job.co.kr/sitemap.xml
-
-# 캐시 관련 파일 차단
-User-agent: *
-Disallow: /*.json$
-Disallow: /api/
-Disallow: /admin/
-Disallow: /.git/
-Disallow: /node_modules/
-Disallow: /src/
-Disallow: /build/
-Disallow: /.env
-Disallow: /package.json
-Disallow: /package-lock.json
-
-# 중복 콘텐츠 방지
-User-agent: *
-Disallow: /*?
-Disallow: /*&
-Allow: /*?seo=true
-
-# 크롤링 빈도 제어
-# 1초 딜레이 = 서버 부하 방지
-# Google은 0초 = 우선 크롤링
