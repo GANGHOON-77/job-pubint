@@ -1,0 +1,13 @@
+User-agent: *
+Allow: /
+Allow: /about.html
+Disallow: /jobs/
+Disallow: /backup/
+Disallow: /*.backup.html
+
+# Google AdSense
+User-agent: Mediapartners-Google
+Allow: /
+
+# Sitemap
+Sitemap: https://public-job.co.kr/sitemap.xml
