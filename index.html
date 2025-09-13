@@ -1891,11 +1891,10 @@
                 <!-- 기관 유형 필터 - 탭 스타일 -->
                 <div class="agency-filter">
                     <div class="filter-item">
-                        <input type="checkbox" id="filter-government" class="agency-checkbox" disabled>
-                        <label for="filter-government" class="tab-label disabled" onclick="showComingSoon(this, event)">
+                        <input type="checkbox" id="filter-government" class="agency-checkbox">
+                        <label for="filter-government" class="tab-label" onclick="goToGovernmentPortal(event)">
                             <span class="filter-icon">🏛️</span>
                             <span class="filter-label">정부기관</span>
-                            <div class="coming-soon-tooltip">연결예정</div>
                         </label>
                     </div>
                     <div class="filter-item">
@@ -3087,6 +3086,16 @@
             setTimeout(() => {
                 tooltip.classList.remove('show');
             }, 200);
+        }
+        
+        // 정부기관 포털로 이동
+        function goToGovernmentPortal(event) {
+            // 이벤트 버블링 방지
+            event.stopPropagation();
+            event.preventDefault();
+            
+            // 정부기관 포털로 연결
+            window.open('https://korea-jobportal.co.kr/', '_blank');
         }
         
         // 통계 설명 토글 기능
