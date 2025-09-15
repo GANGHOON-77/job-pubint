@@ -1,7 +1,7 @@
 User-agent: *
 Allow: /
 Allow: /about.html
-Disallow: /jobs/
+Allow: /jobs/
 Disallow: /backup/
 Disallow: /*.backup.html
 
