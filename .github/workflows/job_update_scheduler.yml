@@ -30,7 +30,12 @@ jobs:
     name: 채용정보 업데이트
     runs-on: ubuntu-latest
     timeout-minutes: 45  # 10분 간격으로 더 많은 데이터 처리 시간 확보
-    
+
+  # GitHub API 권한 설정 (Issue 생성을 위해 필요)
+    permissions:
+      contents: read      # 코드 체크아웃 권한
+      issues: write       # Issue 생성/수정 권한
+
     # 실패 시 자동 재시도 설정
     strategy:
       fail-fast: false
@@ -267,3 +272,4 @@ jobs:
           -d chat_id="${TELEGRAM_CHAT_ID}" \
           -d text="${MESSAGE}" \
           -d parse_mode="Markdown"
+
