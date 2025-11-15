@@ -1,42 +1,65 @@
 name: Attachment Collector
 
-on:
-  schedule:
-    # 매시간 실행 (UTC 기준)
-    - cron: '0 * * * *'
-  workflow_dispatch: # 수동 실행 가능
+  on:
+    schedule:
+      # 매시간 실행 (UTC 기준)
+      - cron: '0 * * * *'
+    workflow_dispatch: # 수동 실행 가능
 
-jobs:
-  collect-attachments:
-    runs-on: ubuntu-latest
-    
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
-      
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.11'
-        
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install requests beautifulsoup4 firebase-admin pytz
-        
-    - name: Create Firebase key file
-      run: |
-        cat << 'EOF' > firebase-key.json
-        ${{ secrets.FIREBASE_CREDENTIALS }}
-        EOF
-        
-    - name: Run attachment collector
-      run: |
-        python attachment_collector.py
-      env:
-        FIREBASE_KEY_PATH: firebase-key.json
-        TZ: Asia/Seoul
-        
-    - name: Clean up
-      run: |
-        rm -f firebase-key.json
+  jobs:
+    collect-attachments:
+      runs-on: ubuntu-latest
+      timeout-minutes: 30
+
+      steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests==2.31.0 beautifulsoup4==4.12.2 firebase-admin==6.2.0 pytz==2023.3
+
+      - name: Create Firebase key file
+        run: echo '${{ secrets.FIREBASE_CREDENTIALS }}' > firebase-key.json
+
+      - name: Verify Firebase key file
+        run: |
+          # 파일 생성 검증
+          if [ ! -f firebase-key.json ]; then
+            echo "❌ Firebase 키 파일 생성 실패"
+            exit 1
+          fi
+
+          # 파일 크기 확인 (너무 작으면 에러)
+          FILE_SIZE=$(wc -c < firebase-key.json)
+          if [ $FILE_SIZE -lt 100 ]; then
+            echo "❌ Firebase 키 파일이 너무 작음 (${FILE_SIZE} bytes)"
+            echo "파일 내용 (첫 100자):"
+            head -c 100 firebase-key.json
+            exit 1
+          fi
+
+          echo "✅ Firebase 키 파일 생성 완료 (${FILE_SIZE} bytes)"
+
+          # JSON 형식 검증
+          python -c "import json; json.load(open('firebase-key.json'))" && echo "✅ JSON 형식 검증 완료" || (echo
+  "❌ JSON 형식 오류" && exit 1)
+
+      - name: Run attachment collector
+        run: python attachment_collector.py
+        env:
+          FIREBASE_KEY_PATH: firebase-key.json
+          TZ: Asia/Seoul
+        continue-on-error: true
+
+      - name: Clean up
+        if: always()
+        run: |
+          rm -f firebase-key.json
+          echo "🧹 임시 파일 정리 완료"
