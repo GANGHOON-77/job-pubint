@@ -23,6 +23,8 @@ name: Attachment Collector
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
+          pip install packaging==23.1
+          pip install google-cloud-firestore==2.11.1
           pip install requests==2.31.0 beautifulsoup4==4.12.2 firebase-admin==6.2.0 pytz==2023.3
 
       - name: Create Firebase key file
@@ -51,12 +53,17 @@ name: Attachment Collector
           python -c "import json; json.load(open('firebase-key.json'))" && echo "✅ JSON 형식 검증 완료" || (echo
   "❌ JSON 형식 오류" && exit 1)
 
+      - name: Verify imports
+        run: |
+          python -c "import packaging; print('✅ packaging:', packaging.__version__)"
+          python -c "import google.cloud.firestore; print('✅ google-cloud-firestore 임포트 성공')"
+          python -c "import firebase_admin; print('✅ firebase-admin:', firebase_admin.__version__)"
+
       - name: Run attachment collector
         run: python attachment_collector.py
         env:
           FIREBASE_KEY_PATH: firebase-key.json
           TZ: Asia/Seoul
-        continue-on-error: true
 
       - name: Clean up
         if: always()
