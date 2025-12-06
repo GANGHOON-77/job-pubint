@@ -178,34 +178,36 @@
             try {
                 console.log('Firebase에서 데이터 로딩 시작...');
                 
-                // 30일 필터링 (8월 6일 이후)
-                const cutoffDate = new Date('2025-08-06');
-                
+                // 30일 필터링 (현재일 기준 동적 계산)
+                const now = new Date();
+                const cutoffDate = new Date(now.getTime() - (30 * 24 * 60 * 60 * 1000));
+                console.log(`📅 30일 필터링 기준일: ${cutoffDate.toISOString().split('T')[0]}`);
+
                 const q = query(
                     collection(db, 'recruitment_jobs'),
                     orderBy('reg_date', 'desc')  // 최신 등록순 (잡알리오와 동일)
                 );
-                
+
                 const querySnapshot = await getDocs(q);
                 const jobs = [];
-                
+
                 let excludedCount = 0;
                 let invalidDateCount = 0;
                 let includedCount = 0;
-                
+
                 querySnapshot.forEach((doc) => {
                     const data = doc.data();
                     const regDateValue = data.reg_date || data.regDate;
                     const regDate = new Date(regDateValue);
-                    
+
                     // 날짜 유효성 체크
                     if (!regDateValue || isNaN(regDate.getTime())) {
                         invalidDateCount++;
                         console.log(`⚠️ 유효하지 않은 날짜: ${regDateValue}, doc.id: ${doc.id}`);
                         return; // 날짜가 없으면 건너뛰기
                     }
-                    
-                    // 8월 6일 이후 데이터만 포함
+
+                    // 30일 이내 데이터만 포함 (동적 계산)
                     if (regDate >= cutoffDate) {
                         includedCount++;
                         // Firebase 실제 필드명으로 매핑 (콘솔 확인 결과 적용)
