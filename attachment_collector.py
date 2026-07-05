@@ -161,7 +161,7 @@ class AttachmentCollector:
             
             if attachments:
                 # Firebase 업데이트
-                doc_ref = self.db.collection('recruitment_jobs').document(str(job_idx))
+                doc_ref = self.db.collection('jobs').document(str(job_idx))
                 doc_ref.update({
                     'attachments': attachments,
                     'updated_at': firestore.SERVER_TIMESTAMP
@@ -182,7 +182,7 @@ class AttachmentCollector:
             print("🔍 첨부파일 누락 공고 검토 중...")
             
             # 공고 조회 (offset 적용)
-            jobs_ref = self.db.collection('recruitment_jobs').order_by('created_at', direction=firestore.Query.DESCENDING).offset(offset).limit(limit)
+            jobs_ref = self.db.collection('jobs').order_by('created_at', direction=firestore.Query.DESCENDING).offset(offset).limit(limit)
             docs = jobs_ref.stream()
             
             missing_jobs = []
@@ -297,7 +297,7 @@ class AttachmentCollector:
                 print(f"\n📋 공고 {job_idx} 확인 중...")
                 
                 # Firebase에서 해당 공고 조회
-                doc_ref = self.db.collection('recruitment_jobs').document(str(job_idx))
+                doc_ref = self.db.collection('jobs').document(str(job_idx))
                 doc = doc_ref.get()
                 
                 if not doc.exists:
@@ -392,7 +392,7 @@ if __name__ == "__main__":
     
     try:
         # reg_date로 오늘 게시글 검색
-        jobs_ref = collector.db.collection('recruitment_jobs').where('reg_date', '==', today)
+        jobs_ref = collector.db.collection('jobs').where('reg_date', '==', today)
         docs = jobs_ref.stream()
         
         today_jobs = []
@@ -473,4 +473,4 @@ if __name__ == "__main__":
             
     except Exception as e:
         print(f"❌ 오류 발생: {e}")
-        print("reg_date 기준 검색에 실패했습니다.")
+        print("reg_date 기준 검색에 실패했습니다.")

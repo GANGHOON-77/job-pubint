@@ -69,7 +69,7 @@ class AutoJobUpdater:
     def load_existing_job_ids(self):
         """기존 채용공고 ID 목록을 로드"""
         try:
-            collection_ref = self.db.collection('recruitment_jobs')
+            collection_ref = self.db.collection('jobs')
             docs = collection_ref.select(['idx']).get()
             
             self.existing_job_ids = set()
@@ -371,7 +371,7 @@ class AutoJobUpdater:
     def save_to_firebase(self, job):
         """단일 채용공고를 Firebase에 저장"""
         try:
-            collection_ref = self.db.collection('recruitment_jobs')
+            collection_ref = self.db.collection('jobs')
             doc_ref = collection_ref.document(job['idx'])
             
             doc_ref.set(job)
@@ -424,7 +424,7 @@ class AutoJobUpdater:
             
             logger.info(f"삭제 기준일: {cutoff_date} 이전 등록 게시글")
             
-            collection_ref = self.db.collection('recruitment_jobs')
+            collection_ref = self.db.collection('jobs')
             
             # 30일 이전 등록된 문서들 조회
             query = collection_ref.where('reg_date', '<', cutoff_date)

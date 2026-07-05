@@ -184,7 +184,7 @@
                 console.log(`📅 30일 필터링 기준일: ${cutoffDate.toISOString().split('T')[0]}`);
 
                 const q = query(
-                    collection(db, 'recruitment_jobs'),
+                    collection(db, 'jobs'),
                     orderBy('reg_date', 'desc')  // 최신 등록순 (잡알리오와 동일)
                 );
 
@@ -215,20 +215,20 @@
                             id: doc.id,
                             idx: data.idx || doc.id,
                             title: data.title || '제목 없음',
-                            dept_name: data.dept_name || '기관명 없음',
-                            work_region: data.work_region || '지역 정보 없음',
-                            employment_type: data.employment_type || '고용형태 정보 없음',
+                            dept_name: data.dept_name || data.company || '기관명 없음',
+                            work_region: data.work_region || data.location || '지역 정보 없음',
+                            employment_type: data.employment_type || data.job_type || '고용형태 정보 없음',
                             reg_date: data.reg_date,
                             end_date: data.end_date,
-                            recruit_num: data.recruit_num || '1',
-                            recruit_type: data.recruit_type || '채용구분 정보 없음',
-                            ncs_category: data.ncs_category || 'NCS 대분류',
+                            recruit_num: data.recruit_num || data.recruit_count || '1',
+                            recruit_type: data.recruit_type || data.ncs_name || '채용구분 정보 없음',
+                            ncs_category: data.ncs_category || data.ncs_name || 'NCS 대분류',
                             education: data.education || '학력무관',
-                            work_field: data.work_field || '일반행정',
+                            work_field: data.work_field || data.ncs_name || '일반행정',
                             salary_info: data.salary_info || '회사내규에 따름',
                             preference: data.preference || '해당사항 없음',
-                            recruit_period: data.recruit_period || '채용기간 정보 없음',
-                            detail_content: data.detail_content || '상세 내용이 제공되지 않았습니다.',
+                            recruit_period: data.recruit_period || `${data.reg_date || ''} ~ ${data.end_date || ''}`,
+                            detail_content: data.detail_content || data.qualification || '상세 내용이 제공되지 않았습니다.',
                             // 추가 실제 필드들
                             disqualification: data.disqualification,
                             ncs_name: data.ncs_name,
