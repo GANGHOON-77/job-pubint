@@ -1,0 +1,5 @@
+__pycache__/
+*.pyc
+*firebase-adminsdk*.json
+파이어베이스 인증/
+/tmp/

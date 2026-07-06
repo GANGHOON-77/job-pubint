@@ -1058,9 +1058,11 @@
         }
 
         .job-detail-btn {
+            display: inline-block;
             padding: 6px 12px;
             background: linear-gradient(135deg, #667eea, #764ba2);
             color: white;
+            text-decoration: none;
             border: none;
             border-radius: 6px;
             font-size: 12px;
@@ -2034,7 +2036,15 @@
                             <li><a href="contact.html">문의하기</a></li>
                         </ul>
                     </div>
-                    
+
+                    <div class="footer-link-group">
+                        <h4 class="footer-link-title">채용 가이드</h4>
+                        <ul class="footer-link-list">
+                            <li><a href="guide-apply-tips.html">채용 지원 준비 가이드</a></li>
+                            <li><a href="guide-howto.html">사이트 활용법</a></li>
+                        </ul>
+                    </div>
+
                     <div class="footer-link-group">
                         <h4 class="footer-link-title">이용 안내</h4>
                         <ul class="footer-link-list">
@@ -2374,9 +2384,9 @@
                         </div>
                     </div>
                     <div class="job-actions">
-                        <button class="job-detail-btn" onclick="showJobDetail('${job.idx}'); event.stopPropagation();">
+                        <a class="job-detail-btn" href="/jobs/${job.idx}/" onclick="event.preventDefault(); event.stopPropagation(); showJobDetail('${job.idx}');">
                             📋 상세보기
-                        </button>
+                        </a>
                     </div>
                 </div>
             `;
@@ -2472,23 +2482,10 @@
         }
 
         // URL 라우팅 및 이중구조 지원 시스템
-        let isGoogleBot = false;
         let currentJobId = null;
-
-        // 구글봇 감지 함수
-        function detectGoogleBot() {
-            const userAgent = navigator.userAgent.toLowerCase();
-            return userAgent.includes('googlebot') || 
-                   userAgent.includes('google') ||
-                   userAgent.includes('crawler') ||
-                   userAgent.includes('bot');
-        }
 
         // URL 라우팅 초기화
         function initializeRouting() {
-            isGoogleBot = detectGoogleBot();
-            console.log('구글봇 감지:', isGoogleBot);
-            
             // 페이지 로드 시 URL 확인
             const path = window.location.pathname;
             const jobIdMatch = path.match(/^\/jobs\/(.+)$/);
@@ -2671,17 +2668,11 @@
             }
             
             console.log('상세보기 모달 표시:', jobIdx, job.title);
-            
-            // 구글봇인 경우에만 상세 페이지로 리다이렉트
-            if (isGoogleBot) {
-                showJobDetailPage(jobIdx);
-                return;
-            }
-            
+
             // URL 업데이트 (에러 방지를 위해 try-catch 추가)
             if (!skipUrlUpdate) {
                 try {
-                    const newUrl = `/jobs/${jobIdx}`;
+                    const newUrl = `/jobs/${jobIdx}/`;
                     history.pushState({ jobId: jobIdx, modal: true }, job.title, newUrl);
                     currentJobId = jobIdx;
                 } catch (error) {
@@ -3185,13 +3176,7 @@
                 if (event.state && event.state.jobId && allJobs.length > 0) {
                     const job = allJobs.find(j => j.idx === event.state.jobId);
                     if (job) {
-                        if (event.state.modal) {
-                            showJobDetail(event.state.jobId, true);
-                        } else if (isGoogleBot) {
-                            showJobDetailPage(event.state.jobId);
-                        } else {
-                            showJobDetail(event.state.jobId, true);
-                        }
+                        showJobDetail(event.state.jobId, true);
                     }
                 } else {
                     // 홈페이지로
@@ -3230,10 +3215,7 @@
         // 페이지 로드시 자동으로 데이터 불러오기 (기존 방식 완전 복원)
         window.addEventListener('DOMContentLoaded', function() {
             console.log('페이지 초기화 시작');
-            
-            // 라우팅 관련 변수만 초기화 (실제 라우팅은 나중에)
-            isGoogleBot = detectGoogleBot();
-            
+
             // 기존과 동일한 초기화
             initializeFilters();
             loadJobs(); // 자동 로딩
