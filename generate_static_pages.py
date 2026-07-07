@@ -23,6 +23,50 @@ JOBS_DIR = os.path.join(REPO_ROOT, "jobs")
 SITEMAP_PATH = os.path.join(REPO_ROOT, "sitemap.xml")
 KST = timezone(timedelta(hours=9))
 
+REGION_ADDRESS_FALLBACKS = {
+    "서울": ("서울특별시", "서울특별시 중구 세종대로 110", "04524"),
+    "부산": ("부산광역시", "부산광역시 연제구 중앙대로 1001", "47545"),
+    "대구": ("대구광역시", "대구광역시 중구 공평로 88", "41911"),
+    "인천": ("인천광역시", "인천광역시 남동구 정각로 29", "21554"),
+    "광주": ("광주광역시", "광주광역시 서구 내방로 111", "61945"),
+    "대전": ("대전광역시", "대전광역시 서구 둔산로 100", "35242"),
+    "울산": ("울산광역시", "울산광역시 남구 중앙로 201", "44675"),
+    "세종": ("세종특별자치시", "세종특별자치시 한누리대로 2130", "30151"),
+    "경기": ("경기도", "경기도 수원시 영통구 도청로 30", "16508"),
+    "강원": ("강원특별자치도", "강원특별자치도 춘천시 중앙로 1", "24266"),
+    "충북": ("충청북도", "충청북도 청주시 상당구 상당로 82", "28515"),
+    "충남": ("충청남도", "충청남도 홍성군 홍북읍 충남대로 21", "32255"),
+    "전북": ("전북특별자치도", "전북특별자치도 전주시 완산구 효자로 225", "54968"),
+    "전남": ("전라남도", "전라남도 무안군 삼향읍 오룡길 1", "58564"),
+    "경북": ("경상북도", "경상북도 안동시 풍천면 도청대로 455", "36759"),
+    "경남": ("경상남도", "경상남도 창원시 의창구 중앙대로 300", "51154"),
+    "제주": ("제주특별자치도", "제주특별자치도 제주시 문연로 6", "63122"),
+    "전국": ("대한민국", "대한민국", "00000"),
+}
+
+
+def structured_address(work_region):
+    region_text = (work_region or "전국").strip()
+    primary_region = region_text.replace("·", ",").replace("/", ",").split(",")[0].strip() or "전국"
+    for key, (address_region, street_address, postal_code) in REGION_ADDRESS_FALLBACKS.items():
+        if key in primary_region:
+            return {
+                "@type": "PostalAddress",
+                "streetAddress": street_address,
+                "addressLocality": primary_region,
+                "addressRegion": address_region,
+                "postalCode": postal_code,
+                "addressCountry": "KR",
+            }
+    return {
+        "@type": "PostalAddress",
+        "streetAddress": f"{primary_region} 근무지",
+        "addressLocality": primary_region,
+        "addressRegion": primary_region,
+        "postalCode": "00000",
+        "addressCountry": "KR",
+    }
+
 STATIC_PAGES = [
     ("/", "daily", "1.0"),
     ("/about.html", "monthly", "0.8"),
@@ -150,11 +194,7 @@ def build_job_json_ld(job, page_url):
         },
         "jobLocation": {
             "@type": "Place",
-            "address": {
-                "@type": "PostalAddress",
-                "addressLocality": job.get('work_region', ''),
-                "addressCountry": "KR",
-            },
+            "address": structured_address(job.get('work_region', '')),
         },
         "directApply": True,
         "url": page_url,
