@@ -729,6 +729,48 @@
             margin-top: 20px;
         }
 
+        .affiliate-ad {
+            max-width: 900px;
+            margin: 0 auto 24px;
+            padding: 14px 16px 12px;
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.08);
+        }
+
+        .affiliate-ad-label {
+            margin-bottom: 10px;
+            color: #64748b;
+            font-size: 12px;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .affiliate-ad-frame {
+            width: 100%;
+            overflow-x: auto;
+            overflow-y: hidden;
+            padding-bottom: 4px;
+            text-align: center;
+        }
+
+        .affiliate-ad-frame > div,
+        .affiliate-ad-frame iframe {
+            display: inline-block;
+            min-width: 680px;
+            max-width: none;
+            vertical-align: top;
+        }
+
+        .affiliate-disclosure {
+            margin-top: 10px;
+            color: #64748b;
+            font-size: 11px;
+            line-height: 1.5;
+            text-align: center;
+        }
+
         /* 제어 패널 */
         .controls {
             background: white;
@@ -1980,6 +2022,24 @@
 
 
         <!-- EM2 영역 시작: 채용공고 카드 + 페이지네이션 -->
+        <section class="affiliate-ad" aria-label="Coupang Partners advertisement">
+            <div class="affiliate-ad-label">Sponsored</div>
+            <div class="affiliate-ad-frame">
+                <script src="https://ads-partners.coupang.com/g.js"></script>
+                <script>
+                    new PartnersCoupang.G({
+                        "id": 1005161,
+                        "template": "carousel",
+                        "trackingCode": "AF7537666",
+                        "width": "680",
+                        "height": "140",
+                        "tsource": ""
+                    });
+                </script>
+            </div>
+            <p class="affiliate-disclosure">이 포스팅은 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다.</p>
+        </section>
+
         <div id="em2" class="em2-section">
             <!-- 채용공고 그리드 -->
             <div class="jobs-grid" id="jobsGrid">
