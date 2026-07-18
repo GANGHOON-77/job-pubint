@@ -703,6 +703,64 @@
         }
 
         /* 광고 영역 스타일 */
+        .kakao-ad-slot {
+            display: flex;
+            justify-content: center;
+            margin: 20px auto;
+        }
+
+        .kakao-ad-side {
+            position: fixed;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 500;
+        }
+
+        .kakao-ad-side-pc {
+            right: 12px;
+        }
+
+        .kakao-ad-side-mobile {
+            top: auto;
+            bottom: 12px;
+            left: 50%;
+            right: auto;
+            transform: translateX(-50%);
+        }
+
+        .kakao-ad-side-close {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            width: 24px;
+            height: 24px;
+            line-height: 24px;
+            text-align: center;
+            background: #1e293b;
+            color: #ffffff;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 14px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+        }
+
+        @media (max-width: 1600px) {
+            .kakao-ad-side-pc {
+                display: none;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .kakao-ad-side-mobile {
+                display: block;
+            }
+        }
+
+        @media (min-width: 769px) {
+            .kakao-ad-side-mobile {
+                display: none;
+            }
+        }
 
         /* 컨테이너 */
         .container {
@@ -1919,8 +1977,37 @@
     </div>
 
 
+    <!-- 카카오 애드핏: PC 사이드 -->
+    <div class="kakao-ad-side kakao-ad-side-pc">
+        <span class="kakao-ad-side-close" onclick="this.parentElement.style.display='none'">×</span>
+        <ins class="kakao_ad_area" style="display:none;"
+        data-ad-unit = "DAN-Hp5Vvh8Nj54I1Mfd"
+        data-ad-width = "160"
+        data-ad-height = "600"></ins>
+        <script type="text/javascript" src="//t1.kakaocdn.net/kas/static/ba.min.js" async></script>
+    </div>
+
+    <!-- 카카오 애드핏: 모바일 사이드 -->
+    <div class="kakao-ad-side kakao-ad-side-mobile">
+        <span class="kakao-ad-side-close" onclick="this.parentElement.style.display='none'">×</span>
+        <ins class="kakao_ad_area" style="display:none;"
+        data-ad-unit = "DAN-2S8TBurFsIXJ0Gue"
+        data-ad-width = "320"
+        data-ad-height = "480"></ins>
+        <script type="text/javascript" src="//t1.kakaocdn.net/kas/static/ba.min.js" async></script>
+    </div>
+
     <!-- 메인 컨테이너 -->
     <div class="container">
+        <!-- 카카오 애드핏: 상단 -->
+        <div class="kakao-ad-slot kakao-ad-top">
+            <ins class="kakao_ad_area" style="display:none;"
+            data-ad-unit = "DAN-qBy2J4SOngP28Qfk"
+            data-ad-width = "300"
+            data-ad-height = "250"></ins>
+            <script type="text/javascript" src="//t1.kakaocdn.net/kas/static/ba.min.js" async></script>
+        </div>
+
         <!-- EM1 영역 시작: 통계박스 + 검색창 -->
         <div id="em1" class="em1-section">
             <!-- 통계 섹션 -->
@@ -1974,6 +2061,14 @@
         </div>
         <!-- EM1 영역 끝 -->
 
+        <!-- 카카오 애드핏: 중단 -->
+        <div class="kakao-ad-slot kakao-ad-middle">
+            <ins class="kakao_ad_area" style="display:none;"
+            data-ad-unit = "DAN-C0k5hqB8B7jPSbas"
+            data-ad-width = "320"
+            data-ad-height = "100"></ins>
+            <script type="text/javascript" src="//t1.kakaocdn.net/kas/static/ba.min.js" async></script>
+        </div>
 
         <!-- EM2 영역 시작: 채용공고 카드 + 페이지네이션 -->
         <div id="em2" class="em2-section">
@@ -1989,6 +2084,15 @@
             <div class="pagination" id="pagination"></div>
         </div>
         <!-- EM2 영역 끝 -->
+
+        <!-- 카카오 애드핏: 하단 -->
+        <div class="kakao-ad-slot kakao-ad-bottom">
+            <ins class="kakao_ad_area" style="display:none;"
+            data-ad-unit = "DAN-G10fiRxL9QraAYiG"
+            data-ad-width = "250"
+            data-ad-height = "250"></ins>
+            <script type="text/javascript" src="//t1.kakaocdn.net/kas/static/ba.min.js" async></script>
+        </div>
 
     </div>
 
