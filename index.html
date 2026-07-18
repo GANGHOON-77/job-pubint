@@ -725,132 +725,6 @@
             margin-top: 20px;
         }
 
-        .affiliate-ad {
-            max-width: 900px;
-            margin: 0 auto 24px;
-            padding: 14px 16px 12px;
-            background: #ffffff;
-            border: 1px solid #e5e7eb;
-            border-radius: 12px;
-            box-shadow: 0 2px 15px rgba(0,0,0,0.08);
-        }
-
-        .affiliate-ad-label {
-            margin-bottom: 10px;
-            color: #64748b;
-            font-size: 12px;
-            font-weight: 600;
-            text-align: center;
-        }
-
-        .adpick-footer-ad {
-            max-width: 900px;
-            margin: 28px auto 34px;
-            padding: 22px 24px;
-            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-            border: 1px solid #e5e7eb;
-            border-radius: 12px;
-            box-shadow: 0 2px 15px rgba(0,0,0,0.08);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 18px;
-        }
-
-        .adpick-footer-copy {
-            min-width: 0;
-        }
-
-        .adpick-footer-label {
-            margin-bottom: 6px;
-            color: #10b981;
-            font-size: 12px;
-            font-weight: 700;
-            letter-spacing: 0.04em;
-            text-transform: uppercase;
-        }
-
-        .adpick-footer-title {
-            color: #1e293b;
-            font-size: 20px;
-            font-weight: 800;
-            line-height: 1.35;
-        }
-
-        .adpick-footer-desc {
-            margin-top: 6px;
-            color: #64748b;
-            font-size: 13px;
-            line-height: 1.5;
-        }
-
-        .adpick-footer-link {
-            flex: 0 0 auto;
-            padding: 12px 20px;
-            background: #14b8a6;
-            color: #ffffff;
-            border-radius: 999px;
-            font-size: 15px;
-            font-weight: 800;
-            text-decoration: none;
-            box-shadow: 0 8px 18px rgba(20, 184, 166, 0.25);
-            transition: all 0.2s ease;
-        }
-
-        .adpick-footer-link:hover {
-            background: #0f766e;
-            transform: translateY(-1px);
-        }
-
-        .adpick-footer-disclosure {
-            margin-top: 8px;
-            color: #94a3b8;
-            font-size: 11px;
-            line-height: 1.5;
-        }
-
-        .affiliate-ad-frame {
-            width: 100%;
-            overflow-x: auto;
-            overflow-y: hidden;
-            padding-bottom: 4px;
-            text-align: center;
-        }
-
-        .affiliate-ad-frame > div,
-        .affiliate-ad-frame iframe {
-            display: inline-block;
-            min-width: 680px;
-            max-width: none;
-            vertical-align: top;
-        }
-
-        .affiliate-disclosure {
-            margin-top: 10px;
-            color: #64748b;
-            font-size: 11px;
-            line-height: 1.5;
-            text-align: center;
-        }
-
-        @media (max-width: 640px) {
-            .adpick-footer-ad {
-                align-items: stretch;
-                flex-direction: column;
-                margin: 22px auto 28px;
-                padding: 18px;
-            }
-
-            .adpick-footer-title {
-                font-size: 17px;
-            }
-
-            .adpick-footer-link {
-                width: 100%;
-                text-align: center;
-            }
-        }
-
         /* 제어 패널 */
         .controls {
             background: white;
@@ -2102,24 +1976,6 @@
 
 
         <!-- EM2 영역 시작: 채용공고 카드 + 페이지네이션 -->
-        <section class="affiliate-ad" aria-label="Coupang Partners advertisement">
-            <div class="affiliate-ad-label">Sponsored</div>
-            <div class="affiliate-ad-frame">
-                <script src="https://ads-partners.coupang.com/g.js"></script>
-                <script>
-                    new PartnersCoupang.G({
-                        "id": 1005161,
-                        "template": "carousel",
-                        "trackingCode": "AF7537666",
-                        "width": "680",
-                        "height": "140",
-                        "tsource": ""
-                    });
-                </script>
-            </div>
-            <p class="affiliate-disclosure">이 포스팅은 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다.</p>
-        </section>
-
         <div id="em2" class="em2-section">
             <!-- 채용공고 그리드 -->
             <div class="jobs-grid" id="jobsGrid">
@@ -2135,16 +1991,6 @@
         <!-- EM2 영역 끝 -->
 
     </div>
-
-        <section class="adpick-footer-ad" aria-label="Adpick advertisement">
-            <div class="adpick-footer-copy">
-                <div class="adpick-footer-label">ADPICK</div>
-                <div class="adpick-footer-title">테무 추천 상품 보러가기</div>
-                <div class="adpick-footer-desc">채용정보 확인 후 필요한 생활용품과 사무용품을 둘러보세요.</div>
-                <div class="adpick-footer-disclosure">이 링크는 애드픽 광고 링크입니다.</div>
-            </div>
-            <a class="adpick-footer-link" href="https://bitl.bz/Xvszlj" target="_blank" rel="sponsored nofollow noopener">상품 보기</a>
-        </section>
 
     <!-- 푸터 -->
     <footer class="footer">
