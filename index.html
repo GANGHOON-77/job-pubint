@@ -1935,21 +1935,20 @@
                         <label for="filter-government" class="tab-label" onclick="goToGovernmentPortal(event)">
                             <span class="filter-icon">🏛️</span>
                             <span class="filter-label">정부기관</span>
-                        </label>
+                         </label>
                     </div>
                     <div class="filter-item">
                         <input type="checkbox" id="filter-public" class="agency-checkbox" checked>
                         <label for="filter-public" class="tab-label">
                             <span class="filter-icon">🏢</span>
                             <span class="filter-label">공공기관</span>
-                        </label>
+                         </label>
                     </div>
                     <div class="filter-item">
-                        <input type="checkbox" id="filter-local" class="agency-checkbox" disabled>
-                        <label for="filter-local" class="tab-label disabled" onclick="showComingSoon(this, event)">
+                        <input type="checkbox" id="filter-local" class="agency-checkbox">
+                        <label for="filter-local" class="tab-label" onclick="openRegionJobs(event)">
                             <span class="filter-icon">🏙️</span>
                             <span class="filter-label">지자체</span>
-                            <div class="coming-soon-tooltip">연결예정</div>
                         </label>
                     </div>
                 </div>
@@ -3171,6 +3170,13 @@
             
             // 공공기관이 체크 해제되면 빈 배열 반환
             return [];
+        }
+
+        // 지자체 공공일터 연결
+        function openRegionJobs(event) {
+            event.stopPropagation();
+            event.preventDefault();
+            window.open('https://khoon77.github.io/job-region/', '_blank');
         }
 
         // 연결예정 안내 문구 표시 기능
